@@ -18,6 +18,7 @@ int CCapTask::svc(void)
 
     if(message->msg_type()==ACE_Message_Block::MB_HANGUP) {
       message->release();
+      ACE_DEBUG((LM_DEBUG,"(%t) MB_HANGUP received\n"));
       break;
     }
   }
