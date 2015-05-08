@@ -1,4 +1,8 @@
 #include "CCapTask.h"
+#include "cctTypeDef.h"
+#include "fbinfo.h"
+
+#define DDMS_RAWIMAGE_VERSION 1
 
 CCapTask::CCapTask()
 {
@@ -33,5 +37,59 @@ int CCapTask::svc(void)
   }
   pclose(fp);
   ACE_DEBUG((LM_DEBUG,"(%t) svc end\n"));
+  return 0;
+}
+
+int CCapTask::get_surface_info(fbinfo& fbi,const int width, const int height, const int format)
+{
+  /* see hardware/hardware.h */
+  switch(format)
+  {
+	case 1: /* RGBA_8888 */
+		fbi.bpp = 32;
+		fbi.size = width * height * 4;
+		fbi.red_offset = 0;		fbi.red_length = 8;
+		fbi.green_offset = 8;	fbi.green_length = 8;
+		fbi.blue_offset = 16;	fbi.blue_length = 8;
+		fbi.alpha_offset = 24;	fbi.alpha_length = 8;
+		break;
+	case 2: /* RGBX_8888 */
+		fbi.bpp = 32;
+		fbi.size = width * height * 4;
+		fbi.red_offset = 0;		fbi.red_length = 8;
+		fbi.green_offset = 8;	fbi.green_length = 8;
+		fbi.blue_offset = 16;	fbi.blue_length = 8;
+		fbi.alpha_offset = 24;	fbi.alpha_length = 0;
+		break;
+	case 3: /* RGB_888 */
+		fbi.bpp = 24;
+		fbi.size = width * height * 3;
+		fbi.red_offset = 0;		fbi.red_length = 8;
+		fbi.green_offset = 8;	fbi.green_length = 8;
+		fbi.blue_offset = 16;	fbi.blue_length = 8;
+		fbi.alpha_offset = 24;	fbi.alpha_length = 0;
+		break;
+	case 4: /* RGB_565 */
+		fbi.bpp = 16;
+		fbi.size = width * height * 2;
+		fbi.red_offset = 11;	fbi.red_length = 5;
+		fbi.green_offset = 5;	fbi.green_length = 6;
+		fbi.blue_offset = 0;	fbi.blue_length = 5;
+		fbi.alpha_offset = 0;	fbi.alpha_length = 0;
+		break;
+	case 5:
+		fbi.bpp = 32;
+		fbi.size = width * height * 4;
+		fbi.red_offset = 16;	fbi.red_length = 8;
+		fbi.green_offset = 8;	fbi.green_length = 8;
+		fbi.blue_offset = 0;	fbi.blue_length = 8;
+		fbi.alpha_offset = 24;	fbi.alpha_length = 8;
+		break;
+	default: /* unknown type */
+		return -1;
+  }
+  fbi.version = DDMS_RAWIMAGE_VERSION;
+  fbi.width = width;		
+  fbi.height = height;
   return 0;
 }
