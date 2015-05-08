@@ -10,9 +10,9 @@ include $(PREBUILT_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := fCap 
-LOCAL_SRC_FILES := main.cpp
+LOCAL_SRC_FILES := main.cpp \ CCapTask.cpp
 LOCAL_LDFLAGS:=-fPIE -pie
 LOCAL_SHARED_LIBRARIES := libACE
-LOCAL_C_INCLUDES += /home/skwak/ACE_wrappers
+LOCAL_C_INCLUDES += /home/skwak/ACE_wrappers \ /home/skwak/cct/fCap
 
 include $(BUILD_EXECUTABLE)
