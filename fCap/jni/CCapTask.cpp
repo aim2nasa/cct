@@ -31,7 +31,7 @@ int CCapTask::svc(void)
     int nSurfInfo = get_surface_info(fbi,w,h,f);
     ACE_ASSERT(nSurfInfo!=-1);
 
-    ACE_DEBUG((LM_DEBUG," bpp:%d size:(%d) w:%d h:%d",fbi.bpp,fbi.size,fbi.width,fbi.height));
+    ACE_DEBUG((LM_DEBUG," bpp:%d sz:(%d) w:%d h:%d",fbi.bpp,fbi.size,fbi.width,fbi.height));
     ACE_DEBUG((LM_DEBUG," R(%d,%d) G(%d,%d) B(%d,%d) A(%d,%d)",
               fbi.red_offset,fbi.red_length,
               fbi.green_offset,fbi.green_length,
@@ -41,7 +41,7 @@ int CCapTask::svc(void)
     _u8* raw_buffer = new _u8[fbi.width*fbi.height*(fbi.bpp/8)];
     int nRead = get_raw_buffer(raw_buffer,fbi.size,fp);
     ACE_ASSERT(nRead==fbi.size);
-    ACE_DEBUG((LM_DEBUG," %dbytes",nRead));
+    ACE_DEBUG((LM_DEBUG," BUF",nRead));
     delete [] raw_buffer;
 
     tv = ACE_OS::gettimeofday() - tv;
