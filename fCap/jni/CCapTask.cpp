@@ -18,6 +18,7 @@ int CCapTask::svc(void)
 
   FILE* fp;
   for(;;){
+    ACE_Time_Value tv = ACE_OS::gettimeofday();
     fp = popen("screencap","r");
     if(!fp) ACE_ERROR_RETURN((LM_ERROR,"%p\n","popen(screencap)"),-1); 
 
@@ -32,12 +33,14 @@ int CCapTask::svc(void)
     ACE_ASSERT(nSurfInfo!=-1);
 
     ACE_DEBUG((LM_DEBUG," bpp:%d size:(%d) w:%d h:%d",fbi.bpp,fbi.size,fbi.width,fbi.height));
-    ACE_DEBUG((LM_DEBUG," R(%d,%d) G(%d,%d) B(%d,%d) A(%d,%d)\n",
+    ACE_DEBUG((LM_DEBUG," R(%d,%d) G(%d,%d) B(%d,%d) A(%d,%d)",
               fbi.red_offset,fbi.red_length,
               fbi.green_offset,fbi.green_length,
               fbi.blue_offset,fbi.blue_length,
               fbi.alpha_offset,fbi.alpha_length));  
 
+    tv = ACE_OS::gettimeofday() - tv;
+    ACE_DEBUG((LM_DEBUG," %dms\n",tv.msec()));
     pclose(fp);
   }
   ACE_DEBUG((LM_DEBUG,"(%t) svc end\n"));
