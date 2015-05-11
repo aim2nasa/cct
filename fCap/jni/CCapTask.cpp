@@ -1,5 +1,6 @@
 #include "CCapTask.h"
 #include "fbinfo.h"
+#include "ace/OS_NS_time.h"
 
 #define DDMS_RAWIMAGE_VERSION 1
 
@@ -15,8 +16,11 @@ int CCapTask::svc(void)
 {
   ACE_DEBUG((LM_DEBUG,"(%t) svc start\n"));
 
+  time_t clock;
   FILE* fp;
   for(;;){
+    ACE_OS::time(&clock);
+    struct tm *tm = ACE_OS::localtime(&clock);
     ACE_Time_Value tv = ACE_OS::gettimeofday();
     fp = popen("screencap","r");
     if(!fp) ACE_ERROR_RETURN((LM_ERROR,"%p\n","popen(screencap)"),-1); 
@@ -25,7 +29,7 @@ int CCapTask::svc(void)
     if(fread(&w,1,sizeof(w),fp)!=sizeof(w)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(w)"),-1);
     if(fread(&h,1,sizeof(h),fp)!=sizeof(h)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(h)"),-1);
     if(fread(&f,1,sizeof(f),fp)!=sizeof(f)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(f)"),-1);
-    ACE_DEBUG((LM_DEBUG,"(%t) w(%d) h(%d) f(%d)",w,h,f));
+    ACE_DEBUG((LM_DEBUG,"[%d:%02d:%02d] w(%d) h(%d) f(%d)",tm->tm_hour,tm->tm_min,tm->tm_sec,w,h,f));
 
     struct fbinfo fbi;
     int nSurfInfo = get_surface_info(fbi,w,h,f);
