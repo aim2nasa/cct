@@ -1,5 +1,4 @@
 #include "CCapTask.h"
-#include "cctTypeDef.h"
 #include "fbinfo.h"
 
 #define DDMS_RAWIMAGE_VERSION 1
@@ -38,6 +37,12 @@ int CCapTask::svc(void)
               fbi.green_offset,fbi.green_length,
               fbi.blue_offset,fbi.blue_length,
               fbi.alpha_offset,fbi.alpha_length));  
+
+    _u8* raw_buffer = new _u8[fbi.width*fbi.height*(fbi.bpp/8)];
+    int nRead = get_raw_buffer(raw_buffer,fbi.size,fp);
+    ACE_ASSERT(nRead==fbi.size);
+    ACE_DEBUG((LM_DEBUG," %dbytes",nRead));
+    delete [] raw_buffer;
 
     tv = ACE_OS::gettimeofday() - tv;
     ACE_DEBUG((LM_DEBUG," %dms\n",tv.msec()));
@@ -99,4 +104,22 @@ int CCapTask::get_surface_info(fbinfo& fbi,const int width, const int height, co
   fbi.width = width;		
   fbi.height = height;
   return 0;
+}
+
+int CCapTask::get_raw_buffer(_u8* p,_u32 fbiSize,FILE* fp)
+{
+  static const _u32 buff_size = 1 * 1024;
+  int fb_size = fbiSize ;
+  int total_read = 0;
+  int read_size = buff_size;
+  int ret;
+  _u8 buff[buff_size];	
+
+  while( 0 < (ret = fread(buff, 1, read_size, fp)) ) {
+    total_read += ret;
+    memcpy(p, buff, ret);
+    p+=ret;
+    if(fb_size - total_read < buff_size) read_size = fb_size-total_read;
+  }
+  return total_read;
 }
