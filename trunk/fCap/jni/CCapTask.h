@@ -14,6 +14,8 @@ public:
    int get_raw_buffer(_u8* p,_u32 fbiSize,FILE* fp);
 
   virtual int svc(void); 
+
+  ACE_Message_Queue<ACE_MT_SYNCH>* m_pQ;
 };
 
 #endif

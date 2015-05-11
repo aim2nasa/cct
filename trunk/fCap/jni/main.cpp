@@ -1,4 +1,5 @@
 #include "CCapTask.h"
+#include "CNullTask.h"
 #include "ace/OS_NS_unistd.h"
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -6,7 +7,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   ACE_DEBUG((LM_DEBUG,"(%t) start of main\n"));
 
   CCapTask cap;
+  CNullTask nt;
+
+  cap.m_pQ = nt.msg_queue();
+
   cap.activate(); 
+  nt.activate();
 
   ACE_Message_Block* hangup;
   ACE_NEW_RETURN(hangup,ACE_Message_Block(0,ACE_Message_Block::MB_HANGUP),-1);
@@ -15,6 +21,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   cap.putq(hangup);
   cap.wait();
+
   ACE_DEBUG((LM_DEBUG,"(%t) end of main\n"));
   return 0;
 }
