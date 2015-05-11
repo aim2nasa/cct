@@ -5,6 +5,7 @@
 #define DDMS_RAWIMAGE_VERSION 1
 
 CCapTask::CCapTask()
+:m_pQ(NULL)
 {
 }
 
@@ -18,6 +19,7 @@ int CCapTask::svc(void)
 
   time_t clock;
   FILE* fp;
+  ACE_Message_Block* message;
   for(;;){
     ACE_OS::time(&clock);
     struct tm *tm = ACE_OS::localtime(&clock);
@@ -42,10 +44,19 @@ int CCapTask::svc(void)
               fbi.blue_offset,fbi.blue_length,
               fbi.alpha_offset,fbi.alpha_length));  
 
-    _u8* raw_buffer = new _u8[fbi.width*fbi.height*(fbi.bpp/8)];
+    int nAllocSize = fbi.width*fbi.height*(fbi.bpp/8);
+    _u8* raw_buffer = new _u8[nAllocSize];
     int nRead = get_raw_buffer(raw_buffer,fbi.size,fp);
     ACE_ASSERT(nRead==fbi.size);
     ACE_DEBUG((LM_DEBUG," BUF",nRead));
+
+    if(m_pQ) {
+      ACE_NEW_RETURN(message,ACE_Message_Block(nAllocSize),-1);
+      message->copy(reinterpret_cast<const char*>(raw_buffer),nAllocSize);
+      int nPutQ = m_pQ->enqueue(message);
+      ACE_ASSERT(nPutQ!=-1);
+    }
+
     delete [] raw_buffer;
 
     tv = ACE_OS::gettimeofday() - tv;
