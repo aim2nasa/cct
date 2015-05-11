@@ -16,26 +16,30 @@ int CCapTask::svc(void)
 {
   ACE_DEBUG((LM_DEBUG,"(%t) svc start\n"));
 
-  FILE* fp = popen("screencap","r");
-  if(!fp) ACE_ERROR_RETURN((LM_ERROR,"%p\n","popen(screencap)"),-1); 
-
-  int w,h,f;
-  if(fread(&w,1,sizeof(w),fp)!=sizeof(w)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(w)"),-1);
-  if(fread(&h,1,sizeof(h),fp)!=sizeof(h)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(h)"),-1);
-  if(fread(&f,1,sizeof(f),fp)!=sizeof(f)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(f)"),-1);
-  ACE_DEBUG((LM_DEBUG,"(%t) w(%d) h(%d) f(%d)\n",w,h,f));
-
-  ACE_Message_Block* message;
+  FILE* fp;
   for(;;){
-    if(this->getq(message)==-1) ACE_ERROR_RETURN((LM_ERROR,"%p\n","getq"),-1);
+    fp = popen("screencap","r");
+    if(!fp) ACE_ERROR_RETURN((LM_ERROR,"%p\n","popen(screencap)"),-1); 
 
-    if(message->msg_type()==ACE_Message_Block::MB_HANGUP) {
-      message->release();
-      ACE_DEBUG((LM_DEBUG,"(%t) MB_HANGUP received\n"));
-      break;
-    }
+    int w,h,f;
+    if(fread(&w,1,sizeof(w),fp)!=sizeof(w)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(w)"),-1);
+    if(fread(&h,1,sizeof(h),fp)!=sizeof(h)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(h)"),-1);
+    if(fread(&f,1,sizeof(f),fp)!=sizeof(f)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(f)"),-1);
+    ACE_DEBUG((LM_DEBUG,"(%t) w(%d) h(%d) f(%d)",w,h,f));
+
+    struct fbinfo fbi;
+    int nSurfInfo = get_surface_info(fbi,w,h,f);
+    ACE_ASSERT(nSurfInfo!=-1);
+
+    ACE_DEBUG((LM_DEBUG," bpp:%d size:(%d) w:%d h:%d",fbi.bpp,fbi.size,fbi.width,fbi.height));
+    ACE_DEBUG((LM_DEBUG," R(%d,%d) G(%d,%d) B(%d,%d) A(%d,%d)\n",
+              fbi.red_offset,fbi.red_length,
+              fbi.green_offset,fbi.green_length,
+              fbi.blue_offset,fbi.blue_length,
+              fbi.alpha_offset,fbi.alpha_length));  
+
+    pclose(fp);
   }
-  pclose(fp);
   ACE_DEBUG((LM_DEBUG,"(%t) svc end\n"));
   return 0;
 }
