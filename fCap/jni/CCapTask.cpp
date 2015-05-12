@@ -3,14 +3,21 @@
 #include "ace/OS_NS_time.h"
 
 #define DDMS_RAWIMAGE_VERSION 1
+#define REF_WIDTH 1440
+#define REF_HEIGHT 2560
+#define REF_AREA (REF_WIDTH*REF_HEIGHT)
+#define RGBA_KIND  4
+#define RGBA_BYTES (RGBA_KIND*8)
 
 CCapTask::CCapTask()
-:m_pQ(NULL)
+:m_pQ(NULL),m_pRawBuffer(NULL)
 {
+  m_pRawBuffer = new _u8[REF_AREA*RGBA_KIND*2]; //2 for redundancy
 }
 
 CCapTask::~CCapTask()
 {
+  delete [] m_pRawBuffer;
 }
 
 int CCapTask::svc(void)
@@ -44,20 +51,17 @@ int CCapTask::svc(void)
               fbi.blue_offset,fbi.blue_length,
               fbi.alpha_offset,fbi.alpha_length));  
 
-    int nAllocSize = fbi.width*fbi.height*(fbi.bpp/8);
-    _u8* raw_buffer = new _u8[nAllocSize];
-    int nRead = get_raw_buffer(raw_buffer,fbi.size,fp);
+    int nRead = get_raw_buffer(m_pRawBuffer,fbi.size,fp);
     ACE_ASSERT(nRead==fbi.size);
     ACE_DEBUG((LM_DEBUG," BUF",nRead));
 
     if(m_pQ) {
+      int nAllocSize = fbi.width*fbi.height*(fbi.bpp/8);
       ACE_NEW_RETURN(message,ACE_Message_Block(nAllocSize),-1);
-      message->copy(reinterpret_cast<const char*>(raw_buffer),nAllocSize);
+      message->copy(reinterpret_cast<const char*>(m_pRawBuffer),nAllocSize);
       int nPutQ = m_pQ->enqueue(message);
       ACE_ASSERT(nPutQ!=-1);
     }
-
-    delete [] raw_buffer;
 
     tv = ACE_OS::gettimeofday() - tv;
     ACE_DEBUG((LM_DEBUG," %dms\n",tv.msec()));
