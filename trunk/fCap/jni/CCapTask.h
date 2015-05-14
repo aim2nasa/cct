@@ -13,9 +13,12 @@ public:
   int get_surface_info(fbinfo& fbi,const int width, const int height, const int format);
   int get_raw_buffer(_u8* p,_u32 fbiSize,FILE* fp);
 
+  int start();
+  int stop();
   virtual int svc(void); 
 
   ACE_Message_Queue<ACE_MT_SYNCH>* m_pQ;
+  bool m_bRun;
 
 protected:
   _u8* m_pRawBuffer;
