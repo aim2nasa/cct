@@ -11,9 +11,11 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := fSvr 
 LOCAL_SRC_FILES := server.cpp \
-                   CStreamHandler.cpp
+                   CStreamHandler.cpp \
+                   ../../fCap/jni/CCapTask.cpp
 LOCAL_LDFLAGS:=-fPIE -pie
 LOCAL_SHARED_LIBRARIES := libACE
-LOCAL_C_INCLUDES += /home/skwak/ACE_wrappers
+LOCAL_C_INCLUDES += /home/skwak/ACE_wrappers \
+                    /home/skwak/cct/fCap/jni
 
 include $(BUILD_EXECUTABLE)

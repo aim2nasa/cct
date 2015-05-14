@@ -1,9 +1,16 @@
 #include "CStreamHandler.h"
 #include <ace/Log_Msg.h>
+#include "CCapTask.h"
 
 CStreamHandler::CStreamHandler()
-	: noti_(0, this, ACE_Event_Handler::WRITE_MASK)
+	: noti_(0, this, ACE_Event_Handler::WRITE_MASK),m_pCapTask(0)
 {
+	m_pCapTask = new CCapTask();
+}
+
+CStreamHandler::~CStreamHandler()
+{
+	delete m_pCapTask;
 }
 
 int CStreamHandler::open(void *)
