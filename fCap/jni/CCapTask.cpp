@@ -8,6 +8,7 @@
 #define REF_AREA (REF_WIDTH*REF_HEIGHT)
 #define RGBA_KIND  4
 #define RGBA_BYTES (RGBA_KIND*8)
+#define ENQUEUE_TIMEOUT	1 //time out 1 sec
 
 CCapTask::CCapTask()
 :m_pQ(NULL),m_pRawBuffer(NULL)
@@ -59,8 +60,11 @@ int CCapTask::svc(void)
       int nAllocSize = fbi.width*fbi.height*(fbi.bpp/8);
       ACE_NEW_RETURN(message,ACE_Message_Block(nAllocSize),-1);
       message->copy(reinterpret_cast<const char*>(m_pRawBuffer),nAllocSize);
-      int nPutQ = m_pQ->enqueue(message);
-      ACE_ASSERT(nPutQ!=-1);
+      ACE_Time_Value waitTime(ACE_OS::gettimeofday()+ACE_Time_Value(ENQUEUE_TIMEOUT,0));
+      if(m_pQ->enqueue(message,&waitTime)<0){
+        message->release();
+        ACE_DEBUG((LM_DEBUG,"enqueue timeout(%dsec)\n",ENQUEUE_TIMEOUT));
+      }
     }
 
     tv = ACE_OS::gettimeofday() - tv;
