@@ -27,10 +27,9 @@ int CCapTask::start()
   return this->activate(); 
 }
 
-int CCapTask::stop()
+void CCapTask::stop()
 {
   m_bRun = false;
-  return this->wait(); 
 }
 
 int CCapTask::svc(void)
