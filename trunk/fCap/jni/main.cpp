@@ -21,6 +21,7 @@ ACE_THR_FUNC_RETURN usrInp(void *p)
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   ACE_DEBUG((LM_DEBUG,"(%t) start of main\n"));
+  ACE_DEBUG((LM_DEBUG,"(%t) press any key and [enter] to exit\n"));
 
   CCapTask cap;
   CNullTask nt;
@@ -34,6 +35,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   ACE_Thread_Manager::instance()->spawn(usrInp,(void*)&cap,THR_NEW_LWP|THR_JOINABLE,&tId);
 
   cap.wait();
+  nt.wait();
 
   ACE_DEBUG((LM_DEBUG,"(%t) end of main\n"));
   return 0;
