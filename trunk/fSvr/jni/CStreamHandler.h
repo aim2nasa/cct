@@ -8,7 +8,7 @@
 
 class CCapTask;
 
-class CStreamHandler : public ACE_Svc_Handler < ACE_SOCK_STREAM, ACE_NULL_SYNCH > {
+class CStreamHandler : public ACE_Svc_Handler < ACE_SOCK_STREAM, ACE_MT_SYNCH > {
 public:
 	CStreamHandler();
 	~CStreamHandler();
@@ -19,7 +19,7 @@ public:
 	virtual int handle_close(ACE_HANDLE handle, ACE_Reactor_Mask close_mask);
 
 private:
-	typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> super;
+	typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_MT_SYNCH> super;
 
 	ACE_INET_Addr remote_addr_;
 	ACE_Reactor_Notification_Strategy noti_;

@@ -6,6 +6,7 @@ CStreamHandler::CStreamHandler()
 	: noti_(0, this, ACE_Event_Handler::WRITE_MASK),m_pCapTask(0)
 {
 	m_pCapTask = new CCapTask();
+	m_pCapTask->m_pQ = this->msg_queue();
 }
 
 CStreamHandler::~CStreamHandler()
@@ -20,8 +21,11 @@ int CStreamHandler::open(void *)
 		return -1;
 	noti_.reactor(this->reactor());
 	this->msg_queue()->notification_strategy(&noti_);
-	if (this->peer().get_remote_addr(remote_addr_) == 0)
-		ACE_DEBUG((LM_INFO, "(%t) New client accepted: %s:%u\n",remote_addr_.get_host_addr(), remote_addr_.get_port_number()));
+	if (this->peer().get_remote_addr(remote_addr_) == 0) {
+		m_pCapTask->start();
+		ACE_DEBUG((LM_INFO, "(%t) New client accepted: %s:%u\n",
+			remote_addr_.get_host_addr(), remote_addr_.get_port_number()));
+	}
 
 	return 0;
 }
@@ -31,8 +35,11 @@ int CStreamHandler::handle_input(ACE_HANDLE handle)
 	ACE_DEBUG((LM_INFO, "(%t) Stream_Handler::handle_input start\n"));
 	char buf[1024];
 	ssize_t recv_cnt;
-	if ((recv_cnt = this->peer().recv(buf, 1024)) <= 0)
+	if ((recv_cnt = this->peer().recv(buf, 1024)) <= 0) {
+		m_pCapTask->stop();
+		m_pCapTask->wait();
 		return -1;
+	}
 
 	ACE_DEBUG((LM_INFO, "(%t) Stream_Handler::handle_input received(%d)\n", recv_cnt));
 
