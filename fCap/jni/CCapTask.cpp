@@ -82,6 +82,11 @@ int CCapTask::svc(void)
     ACE_DEBUG((LM_DEBUG," %dms\n",tv.msec()));
     pclose(fp);
   }
+
+  if(m_pQ) {
+    ACE_NEW_RETURN(message,ACE_Message_Block(0,ACE_Message_Block::MB_HANGUP),-1);
+    m_pQ->enqueue(message);
+  }
   ACE_DEBUG((LM_DEBUG,"(%t) svc end\n"));
   return 0;
 }
