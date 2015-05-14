@@ -10,9 +10,10 @@ include $(PREBUILT_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := fSvr 
-LOCAL_SRC_FILES := server.cpp
+LOCAL_SRC_FILES := server.cpp \
+                   CStreamHandler.cpp
 LOCAL_LDFLAGS:=-fPIE -pie
 LOCAL_SHARED_LIBRARIES := libACE
-LOCAL_C_INCLUDES += /home/skwak/ACE_wrappers 
+LOCAL_C_INCLUDES += /home/skwak/ACE_wrappers
 
 include $(BUILD_EXECUTABLE)
