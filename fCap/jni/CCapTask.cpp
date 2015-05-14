@@ -11,7 +11,7 @@
 #define ENQUEUE_TIMEOUT	1 //time out 1 sec
 
 CCapTask::CCapTask()
-:m_pQ(NULL),m_pRawBuffer(NULL)
+:m_pQ(NULL),m_bRun(false),m_pRawBuffer(NULL)
 {
   m_pRawBuffer = new _u8[REF_AREA*RGBA_KIND*2]; //2 for redundancy
 }
@@ -21,6 +21,18 @@ CCapTask::~CCapTask()
   delete [] m_pRawBuffer;
 }
 
+int CCapTask::start()
+{
+  m_bRun = true;
+  return this->activate(); 
+}
+
+int CCapTask::stop()
+{
+  m_bRun = false;
+  return this->wait(); 
+}
+
 int CCapTask::svc(void)
 {
   ACE_DEBUG((LM_DEBUG,"(%t) svc start\n"));
@@ -28,7 +40,7 @@ int CCapTask::svc(void)
   time_t clock;
   FILE* fp;
   ACE_Message_Block* message;
-  for(;;){
+  while(m_bRun){
     ACE_OS::time(&clock);
     struct tm *tm = ACE_OS::localtime(&clock);
     ACE_Time_Value tv = ACE_OS::gettimeofday();
