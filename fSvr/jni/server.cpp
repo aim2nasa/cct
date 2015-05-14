@@ -5,7 +5,7 @@
 #include <ace/Acceptor.h>
 #include "CStreamHandler.h"
 
-#define SERVER_PORT 9090
+#define SERVER_PORT 9191
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
