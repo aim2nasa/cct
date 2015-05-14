@@ -14,10 +14,8 @@ int CStreamHandler::open(void *)
 	noti_.reactor(this->reactor());
 	this->msg_queue()->notification_strategy(&noti_);
 	if (this->peer().get_remote_addr(remote_addr_) == 0)
-	{
-		ACE_DEBUG((LM_INFO, "New client accepted: %s:%u\n",
-			remote_addr_.get_host_addr(), remote_addr_.get_port_number()));
-	}
+		ACE_DEBUG((LM_INFO, "(%t) New client accepted: %s:%u\n",remote_addr_.get_host_addr(), remote_addr_.get_port_number()));
+
 	return 0;
 }
 
@@ -26,9 +24,9 @@ int CStreamHandler::handle_input(ACE_HANDLE handle)
 	ACE_DEBUG((LM_INFO, "(%t) Stream_Handler::handle_input start\n"));
 	char buf[1024];
 	ssize_t recv_cnt;
-	if ((recv_cnt = this->peer().recv(buf, 1024)) <= 0) {
+	if ((recv_cnt = this->peer().recv(buf, 1024)) <= 0)
 		return -1;
-	}
+
 	ACE_DEBUG((LM_INFO, "(%t) Stream_Handler::handle_input received(%d)\n", recv_cnt));
 
 	ACE_Message_Block *mb;
@@ -48,8 +46,7 @@ int CStreamHandler::handle_output(ACE_HANDLE handle)
 	{
 		ssize_t send_cnt = this->peer().send(mb->rd_ptr(), mb->length());
 		if (send_cnt == -1)
-			ACE_ERROR((LM_ERROR, "[ERROR%T](%N:%l) ### %p\n",
-			"Stream_Handler::handle_output"));
+			ACE_ERROR((LM_ERROR, "[ERROR%T](%N:%l) ### %p\n","Stream_Handler::handle_output"));
 		else {
 			mb->rd_ptr(send_cnt);
 			ACE_DEBUG((LM_INFO, "(%t) Stream_Handler::handle_output sent(%d)\n", send_cnt));
