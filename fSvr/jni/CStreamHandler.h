@@ -7,6 +7,7 @@
 #include <ace/Svc_Handler.h>
 
 class CCapTask;
+class CZcTask;
 
 class CStreamHandler : public ACE_Svc_Handler < ACE_SOCK_STREAM, ACE_MT_SYNCH > {
 public:
@@ -24,6 +25,7 @@ private:
 	ACE_INET_Addr remote_addr_;
 	ACE_Reactor_Notification_Strategy noti_;
 	CCapTask* m_pCapTask;
+	CZcTask* m_pZcTask;
 };
 
 #endif

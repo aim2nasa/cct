@@ -1,16 +1,20 @@
 #include "CStreamHandler.h"
 #include <ace/Log_Msg.h>
 #include "CCapTask.h"
+#include "CZcTask.h"
 
 CStreamHandler::CStreamHandler()
-	: noti_(0, this, ACE_Event_Handler::WRITE_MASK),m_pCapTask(0)
+	: noti_(0, this, ACE_Event_Handler::WRITE_MASK),m_pCapTask(0),m_pZcTask(0)
 {
 	m_pCapTask = new CCapTask();
-	m_pCapTask->m_pQ = this->msg_queue();
+	m_pZcTask = new CZcTask();
+	m_pCapTask->m_pQ = m_pZcTask->msg_queue();
+	m_pZcTask->m_pQ = this->msg_queue();
 }
 
 CStreamHandler::~CStreamHandler()
 {
+	delete m_pZcTask;
 	delete m_pCapTask;
 }
 
@@ -22,6 +26,7 @@ int CStreamHandler::open(void *)
 	noti_.reactor(this->reactor());
 	this->msg_queue()->notification_strategy(&noti_);
 	if (this->peer().get_remote_addr(remote_addr_) == 0) {
+		m_pZcTask->activate();
 		m_pCapTask->start();
 		ACE_DEBUG((LM_INFO, "(%t) New client accepted: %s:%u\n",
 			remote_addr_.get_host_addr(), remote_addr_.get_port_number()));
@@ -38,6 +43,7 @@ int CStreamHandler::handle_input(ACE_HANDLE handle)
 	if ((recv_cnt = this->peer().recv(buf, 1024)) <= 0) {
 		m_pCapTask->stop();
 		m_pCapTask->wait();
+		m_pZcTask->wait();
 		return -1;
 	}
 
