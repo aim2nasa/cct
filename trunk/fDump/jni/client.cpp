@@ -6,11 +6,25 @@
 #include "ace/OS_NS_string.h" 
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_stdlib.h"
+#include "ace/Date_Time.h"
 
-#define SIZE_BUF 1024
+#define SIZE_BUF (1024*4)
+#define REF_WIDTH 1440
+#define REF_HEIGHT 2560
+#define REF_AREA (REF_WIDTH*REF_HEIGHT)
+#define RGBA_KIND  4
+
+typedef unsigned char   _u8;
+typedef unsigned short  _u16;
+typedef unsigned int    _u32;
+typedef signed char     _s8;
+typedef signed short    _s16;
+typedef signed int      _s32;
 
 static char* SERVER_HOST = "127.0.0.1";
-static u_short SERVER_PORT = 9191;
+static u_short SERVER_PORT = 19001;
+
+int get_frame(_u8* p, _u32 fbiSize, ACE_SOCK_Stream& client_stream);
 
 int main(int argc, char *argv[])
 {
@@ -30,17 +44,54 @@ int main(int argc, char *argv[])
 
 	int nRtn = 0, nIter=0;
 	char buffer[SIZE_BUF];
-	while (true){
-		if ((nRtn = client_stream.recv_n(buffer, sizeof(buffer))) == -1) {
-			ACE_ERROR((LM_ERROR, "(%P|%t) Error recv_n(%d)\n", nRtn));
-			break;
-		}else
-			ACE_DEBUG((LM_DEBUG, "(%P|%t) [%d] %dbytes received\n",nIter++,nRtn));
-	}
+	int nHeaderSize = (sizeof(ACE_Time_Value) + 3 * sizeof(int));
+	ACE_DEBUG((LM_DEBUG, "header size:%d\n", nHeaderSize));
 
+	_u8* pRawBuffer = new _u8[REF_AREA*RGBA_KIND * 2];
+	while (true){
+		if ((nRtn = client_stream.recv_n(buffer, nHeaderSize)) == -1) {
+			ACE_ERROR((LM_ERROR, "(%P|%t) Error in reading header, recv_n(%d)\n", nRtn));
+			break;
+		}
+
+		char* p = buffer;
+		ACE_Time_Value tv;
+		ACE_OS::memcpy(&tv, p, sizeof(ACE_Time_Value)); p += sizeof(ACE_Time_Value);
+		ACE_Date_Time dt;
+		dt.update(tv);
+		ACE_DEBUG((LM_DEBUG, "dt.year:%d dt.month:%d\n", dt.year(), dt.month()));
+
+		int nWidth, nHeight, nLength;
+		ACE_OS::memcpy(&nWidth, p, sizeof(int)); p += sizeof(int);
+		ACE_OS::memcpy(&nHeight, p, sizeof(int)); p += sizeof(int);
+		ACE_OS::memcpy(&nLength, p, sizeof(int)); p += sizeof(int);
+		ACE_DEBUG((LM_DEBUG, "width:%d height:%d length:%d\n", nWidth, nHeight, nLength));
+
+		int nGet = get_frame(pRawBuffer, nLength, client_stream);
+		ACE_ASSERT(nGet == nLength);
+	}
+	delete[] pRawBuffer;
 
 	if (client_stream.close() == -1)
 		ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) %p \n", "close"), -1);
 
 	return 0;
+}
+
+int get_frame(_u8* p, _u32 fbiSize, ACE_SOCK_Stream& client_stream)
+{
+	static const _u32 buff_size = 1 * 1024;
+	int fb_size = fbiSize;
+	int total_read = 0;
+	int read_size = buff_size;
+	int ret;
+	_u8 buff[buff_size];
+
+	while (0 < (ret = client_stream.recv_n(buff,read_size))) {
+		total_read += ret;
+		memcpy(p, buff, ret);
+		p += ret;
+		if (fb_size - total_read < buff_size) read_size = fb_size - total_read;
+	}
+	return total_read;
 }
