@@ -33,23 +33,16 @@ int CZcTask::svc(void)
       ACE_DEBUG((LM_DEBUG,"(%t) MB_HANGUP received\n"));
       break;
     }
-    ACE_DEBUG((LM_DEBUG,"(1)"));
 
     _u8* raw_buffer = reinterpret_cast<_u8*>(message->rd_ptr());
     ACE_ASSERT(raw_buffer);
-    ACE_DEBUG((LM_DEBUG,"(2)"));
 
     _u32 raw_buffer_size = message->size();
-    ACE_DEBUG((LM_DEBUG,"(2)Msg(%d)",raw_buffer_size));
     _u32 cmp_buffer_size = RAW_WIDTH*RAW_HEIGHT*RAW_BYTE_PER_PIXEL*2;
-    ACE_DEBUG((LM_DEBUG,"(2)RAW(%d),CMP(%d)",raw_buffer_size,cmp_buffer_size));
-
     int nRtn = compress2(m_pCompBuffer,(uLongf*)&cmp_buffer_size,raw_buffer,raw_buffer_size,COMPRESS_LEVEL);
-
-    ACE_DEBUG((LM_DEBUG,"(3):%d",cmp_buffer_size));
     switch(nRtn){
 	case Z_OK:
-          ACE_DEBUG((LM_DEBUG,"(4)ZOK"));
+          ACE_DEBUG((LM_DEBUG,"\n<%d->%d>\n",message->size(),cmp_buffer_size));
 	  if(m_pQ){
 	    ACE_Message_Block *cmp_message;	
             ACE_NEW_RETURN(cmp_message,ACE_Message_Block(cmp_buffer_size),-1);
@@ -74,8 +67,6 @@ int CZcTask::svc(void)
        	  ACE_DEBUG((LM_DEBUG,"(%t) Undefined error(%d)\n",nRtn));
 	  break;
     }
-
-    ACE_DEBUG((LM_DEBUG,"\n[%d->%d]\n",message->size(),cmp_buffer_size));
 
     message->release();
   }
