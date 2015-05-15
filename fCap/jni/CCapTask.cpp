@@ -1,6 +1,7 @@
 #include "CCapTask.h"
 #include "fbinfo.h"
 #include "ace/OS_NS_time.h"
+#include "CRszUtil.h"
 
 #define DDMS_RAWIMAGE_VERSION 1
 #define REF_WIDTH 1440
@@ -20,13 +21,15 @@
 #define RESIZE_HEIGHT 1024 
 
 CCapTask::CCapTask()
-:m_pQ(NULL),m_bRun(false),m_pRawBuffer(NULL)
+:m_pQ(NULL),m_bRun(false),m_pRawBuffer(NULL),m_pResizeBuffer(NULL)
 {
   m_pRawBuffer = new _u8[REF_AREA*RGBA_KIND*2]; //2 for redundancy
+  m_pResizeBuffer = new _u8[REF_AREA*RESIZE_BYTE_PER_PIXEL*2]; //2 for redundancy
 }
 
 CCapTask::~CCapTask()
 {
+  delete [] m_pResizeBuffer;
   delete [] m_pRawBuffer;
 }
 
@@ -77,9 +80,19 @@ int CCapTask::svc(void)
     ACE_DEBUG((LM_DEBUG," BUF",nRead));
 
     if(m_pQ) {
-      int nAllocSize = fbi.width*fbi.height*(fbi.bpp/8);
+      int resize_w = RAW_WIDTH;
+      int resize_h = RAW_HEIGHT;
+      if(RESIZE_METHOD==0) 
+	CRszUtil::method_0(RESIZE_WIDTH*RESIZE_HEIGHT,RAW_BYTE_PER_PIXEL,
+		RAW_WIDTH,RAW_HEIGHT,&resize_w,&resize_h,RESIZE_BYTE_PER_PIXEL,m_pResizeBuffer,m_pRawBuffer);
+
+      if(RESIZE_METHOD==1) 
+	CRszUtil::method_1(RAW_BYTE_PER_PIXEL,RAW_WIDTH,RAW_HEIGHT,RESIZE_BYTE_PER_PIXEL,
+		m_pResizeBuffer,m_pRawBuffer);
+
+      int nAllocSize = resize_w*resize_h*RESIZE_BYTE_PER_PIXEL;
       ACE_NEW_RETURN(message,ACE_Message_Block(nAllocSize),-1);
-      message->copy(reinterpret_cast<const char*>(m_pRawBuffer),nAllocSize);
+      message->copy(reinterpret_cast<const char*>(m_pResizeBuffer),nAllocSize);
       ACE_Time_Value waitTime(ACE_OS::gettimeofday()+ACE_Time_Value(ENQUEUE_TIMEOUT,0));
       if(m_pQ->enqueue(message,&waitTime)<0){
         message->release();

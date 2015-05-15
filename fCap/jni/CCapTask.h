@@ -22,6 +22,7 @@ public:
 
 protected:
   _u8* m_pRawBuffer;
+  _u8* m_pResizeBuffer;
 };
 
 #endif
