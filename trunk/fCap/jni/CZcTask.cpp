@@ -34,10 +34,11 @@ int CZcTask::svc(void)
       break;
     }
 
-    _u8* raw_buffer = reinterpret_cast<_u8*>(message->rd_ptr());
+    _u32 headerSize = sizeof(ACE_Time_Value)+3*sizeof(int); 
+    _u8* raw_buffer = reinterpret_cast<_u8*>(message->rd_ptr()+headerSize);
     ACE_ASSERT(raw_buffer);
 
-    _u32 raw_buffer_size = message->size();
+    _u32 raw_buffer_size = message->size()-headerSize; //exclude header
     _u32 cmp_buffer_size = RAW_WIDTH*RAW_HEIGHT*RAW_BYTE_PER_PIXEL*2;
     int nRtn = compress2(m_pCompBuffer,(uLongf*)&cmp_buffer_size,raw_buffer,raw_buffer_size,COMPRESS_LEVEL);
     switch(nRtn){
@@ -45,8 +46,16 @@ int CZcTask::svc(void)
           ACE_DEBUG((LM_DEBUG,"\n<%d->%d>\n",message->size(),cmp_buffer_size));
 	  if(m_pQ){
 	    ACE_Message_Block *cmp_message;	
-            ACE_NEW_RETURN(cmp_message,ACE_Message_Block(cmp_buffer_size),-1);
-            cmp_message->copy(reinterpret_cast<const char*>(m_pCompBuffer),cmp_buffer_size);
+            ACE_NEW_RETURN(cmp_message,ACE_Message_Block(cmp_buffer_size+headerSize),-1);
+
+	    //use previously set tv,width,height except length
+	    ACE_OS::memcpy(cmp_message->wr_ptr(),message->rd_ptr(),headerSize-sizeof(int));
+      	    cmp_message->wr_ptr(headerSize-sizeof(int));
+	    ACE_OS::memcpy(cmp_message->wr_ptr(),&cmp_buffer_size,sizeof(int));
+      	    cmp_message->wr_ptr(sizeof(int));
+
+  
+	    ACE_OS::memcpy(cmp_message->wr_ptr(),reinterpret_cast<const char*>(m_pCompBuffer),cmp_buffer_size);
             ACE_Time_Value waitTime(ACE_OS::gettimeofday()+ACE_Time_Value(ENQUEUE_TIMEOUT,0));
             if(m_pQ->enqueue(cmp_message,&waitTime)<0){
               cmp_message->release();

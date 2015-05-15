@@ -90,9 +90,23 @@ int CCapTask::svc(void)
 	CRszUtil::method_1(RAW_BYTE_PER_PIXEL,RAW_WIDTH,RAW_HEIGHT,RESIZE_BYTE_PER_PIXEL,
 		m_pResizeBuffer,m_pRawBuffer);
 
-      int nAllocSize = resize_w*resize_h*RESIZE_BYTE_PER_PIXEL;
+      int nResizedSize = resize_w*resize_h*RESIZE_BYTE_PER_PIXEL;
+
+      //Create header for the catpured data after resizing {timeValue+width+height+len}
+      //Timestamp is the right time just before to call screencap
+      int nAllocSize = nResizedSize + (sizeof(ACE_Time_Value)+3*sizeof(int));
+
       ACE_NEW_RETURN(message,ACE_Message_Block(nAllocSize),-1);
-      message->copy(reinterpret_cast<const char*>(m_pResizeBuffer),nAllocSize);
+      ACE_OS::memcpy(message->wr_ptr(),&tv,sizeof(ACE_Time_Value));
+      message->wr_ptr(sizeof(ACE_Time_Value)); 
+      ACE_OS::memcpy(message->wr_ptr(),&resize_w,sizeof(int));
+      message->wr_ptr(sizeof(int)); 
+      ACE_OS::memcpy(message->wr_ptr(),&resize_h,sizeof(int));
+      message->wr_ptr(sizeof(int)); 
+      ACE_OS::memcpy(message->wr_ptr(),&nAllocSize,sizeof(int));
+      message->wr_ptr(sizeof(int)); 
+      ACE_OS::memcpy(message->wr_ptr(),reinterpret_cast<const char*>(m_pResizeBuffer),nResizedSize);
+
       ACE_Time_Value waitTime(ACE_OS::gettimeofday()+ACE_Time_Value(ENQUEUE_TIMEOUT,0));
       if(m_pQ->enqueue(message,&waitTime)<0){
         message->release();
