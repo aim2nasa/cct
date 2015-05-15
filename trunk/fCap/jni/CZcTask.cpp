@@ -54,8 +54,8 @@ int CZcTask::svc(void)
 	    ACE_OS::memcpy(cmp_message->wr_ptr(),&cmp_buffer_size,sizeof(int));
       	    cmp_message->wr_ptr(sizeof(int));
 
-  
 	    ACE_OS::memcpy(cmp_message->wr_ptr(),reinterpret_cast<const char*>(m_pCompBuffer),cmp_buffer_size);
+      	    cmp_message->wr_ptr(cmp_buffer_size);
             ACE_Time_Value waitTime(ACE_OS::gettimeofday()+ACE_Time_Value(ENQUEUE_TIMEOUT,0));
             if(m_pQ->enqueue(cmp_message,&waitTime)<0){
               cmp_message->release();
