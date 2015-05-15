@@ -17,6 +17,7 @@ LOCAL_SRC_FILES := main.cpp \
                    CZcTask.cpp
 LOCAL_LDFLAGS:=-fPIE -pie
 LOCAL_SHARED_LIBRARIES := libACE
+LOCAL_LDLIBS += -lz
 LOCAL_C_INCLUDES += /home/skwak/ACE_wrappers \ /home/skwak/cct/fCap
 
 include $(BUILD_EXECUTABLE)
