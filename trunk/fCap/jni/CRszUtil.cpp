@@ -1,4 +1,5 @@
 #include "CRszUtil.h"
+#include "ace/Assert.h"
 
 void CRszUtil::method_0(int nThreshold,int nBpp,int nWidth,int nHeight,int* pResize_w,
                         int* pResize_h,int out_pixel_per_bytes,_u8* resize_buffer,_u8* raw_buffer)

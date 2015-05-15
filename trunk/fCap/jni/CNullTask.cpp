@@ -23,6 +23,8 @@ int CNullTask::svc(void)
       break;
     }
 
+    ACE_DEBUG((LM_DEBUG,"\n[%d]\n",message->size()));
+
     message->release();
     //ACE_DEBUG((LM_DEBUG,"(%t) Q(%d)\n",this->msg_queue()->message_count()));
   }
