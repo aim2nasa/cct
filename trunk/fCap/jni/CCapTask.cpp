@@ -10,6 +10,15 @@
 #define RGBA_BYTES (RGBA_KIND*8)
 #define ENQUEUE_TIMEOUT	1 //time out 1 sec
 
+//For resizing
+#define RAW_BYTE_PER_PIXEL 4
+#define RAW_WIDTH 1440
+#define RAW_HEIGHT 2560
+#define RESIZE_BYTE_PER_PIXEL 3
+#define RESIZE_METHOD 0
+#define RESIZE_WIDTH 576
+#define RESIZE_HEIGHT 1024 
+
 CCapTask::CCapTask()
 :m_pQ(NULL),m_bRun(false),m_pRawBuffer(NULL)
 {
