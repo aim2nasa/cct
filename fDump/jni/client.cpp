@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 		ACE_Date_Time dt;
 		dt.update(ACE_OS::gettimeofday());
 		ACE_DEBUG((LM_DEBUG, "Cap %s w(%d) h(%d) length(%d)\n",timeStamp,nWidth,nHeight,nLength));
-		ACE_DEBUG((LM_DEBUG, "Rcv %d-%02d-%02d %02d:%02d:%02d.%06d\n", dt.year(),dt.month(), dt.day(), dt.hour(), dt.minute(), dt.second(), dt.microsec()));
+		//ACE_DEBUG((LM_DEBUG, "Rcv %d-%02d-%02d %02d:%02d:%02d.%06d\n", dt.year(),dt.month(), dt.day(), dt.hour(), dt.minute(), dt.second(), dt.microsec()));
 	}
 	delete[] pRawBuffer;
 
