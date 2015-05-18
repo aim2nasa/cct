@@ -59,6 +59,8 @@ int CCapTask::svc(void)
     struct tm *tm = ACE_OS::localtime(&clock);
     ACE_Time_Value tv = ACE_OS::gettimeofday();
     ACE::timestamp(now,sizeof(now));
+    ACE_DEBUG ((LM_DEBUG, "CapTask:%s\n", now));
+
     fp = popen("screencap","r");
     if(!fp) ACE_ERROR_RETURN((LM_ERROR,"%p\n","popen(screencap)"),-1); 
 

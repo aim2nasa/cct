@@ -8,6 +8,8 @@
 #define COMPRESS_LEVEL 1
 #define ENQUEUE_TIMEOUT 1 //time out 1 sec
 
+#define TIMESTAMP_SIZE 27
+
 CZcTask::CZcTask()
 :m_pQ(NULL),m_pGivenBuffer(NULL),m_pCompBuffer(NULL)
 {
@@ -25,6 +27,7 @@ int CZcTask::svc(void)
 {
   ACE_DEBUG((LM_DEBUG,"(%t) svc start\n"));
 
+  ACE_TCHAR timeStamp[TIMESTAMP_SIZE];
   ACE_Message_Block *message;
   for(;;){
     if(this->getq(message)==-1) ACE_ERROR_RETURN((LM_ERROR,"%p\n","getq"),-1);
@@ -38,11 +41,8 @@ int CZcTask::svc(void)
     _u32 headerSize = sizeof(ACE_Time_Value)+3*sizeof(int); 
     char* p = message->rd_ptr();
 
-    ACE_Time_Value tv;
-    ACE_OS::memcpy(&tv, p, sizeof(ACE_Time_Value)); p += sizeof(ACE_Time_Value);
-    ACE_Date_Time dt;
-    dt.update(tv);
-    ACE_DEBUG((LM_DEBUG,"dt.year:%d dt.month:%d\n",dt.year(),dt.month()));
+    ACE_OS::memcpy(timeStamp, p, sizeof(timeStamp)); p += sizeof(timeStamp);
+    ACE_DEBUG ((LM_DEBUG, "CZcTask:%s\n", timeStamp));
 
     int nWidth, nHeight, nLength;
     ACE_OS::memcpy(&nWidth, p, sizeof(int)); p += sizeof(int);
@@ -69,8 +69,8 @@ int CZcTask::svc(void)
 	    ACE_Message_Block *cmp_message;	
             ACE_NEW_RETURN(cmp_message,ACE_Message_Block(cmp_buffer_size+headerSize),-1);
 
-     	    ACE_OS::memcpy(cmp_message->wr_ptr(),&tv,sizeof(ACE_Time_Value));
-      	    cmp_message->wr_ptr(sizeof(ACE_Time_Value));
+     	    ACE_OS::memcpy(cmp_message->wr_ptr(),timeStamp,sizeof(timeStamp));
+      	    cmp_message->wr_ptr(sizeof(timeStamp));
       	    ACE_OS::memcpy(cmp_message->wr_ptr(),&nWidth,sizeof(int));
       	    cmp_message->wr_ptr(sizeof(int));
       	    ACE_OS::memcpy(cmp_message->wr_ptr(),&nHeight,sizeof(int));
