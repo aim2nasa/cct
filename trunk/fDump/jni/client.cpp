@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 		//ACE_OS::memcpy(&tv, p, sizeof(ACE_Time_Value)); p += sizeof(ACE_Time_Value);
 		ACE_Date_Time dt;
 		dt.update(tv);
-		ACE_DEBUG((LM_DEBUG, "%02d-%02d %02d:%02d:%02d .%d\n",dt.month(),dt.day(),dt.hour(),dt.minute(),dt.second(),dt.microsec()));
+		ACE_DEBUG((LM_DEBUG, "%02d-%02d %02d:%02d:%02d.%06d\n",dt.month(),dt.day(),dt.hour(),dt.minute(),dt.second(),dt.microsec()));
 
 		int nWidth = 576;
 		int nHeight = 1024;
