@@ -84,6 +84,7 @@ int CCapTask::svc(void)
     int nRead = get_raw_buffer(m_pRawBuffer,fbi.size,fp);
     ACE_ASSERT(nRead==fbi.size);
     ACE_DEBUG((LM_DEBUG," BUF",nRead));
+    pclose(fp);
 
     if(m_pQ) {
       int resize_w = RAW_WIDTH;
@@ -123,7 +124,6 @@ int CCapTask::svc(void)
 
     tv = ACE_OS::gettimeofday() - tv;
     ACE_DEBUG((LM_DEBUG," %dms\n",tv.msec()));
-    pclose(fp);
   }
 
   if(m_pQ) {
