@@ -15,6 +15,8 @@
 #define REF_HEIGHT 2560
 #define REF_AREA (REF_WIDTH*REF_HEIGHT)
 #define RGBA_KIND  4
+#define TIMESTAMP_SIZE 27
+#define HEADER_SIZE 39	//Timestamp(27)+width(4)+height(4)+length(4)
 
 typedef unsigned char   _u8;
 typedef unsigned short  _u16;
@@ -27,6 +29,7 @@ static char* SERVER_HOST = "127.0.0.1";
 static u_short SERVER_PORT = 19001;
 
 int get_frame(_u8* p, _u32 fbiSize, ACE_SOCK_Stream& client_stream);
+void parseHeader(const _u8* pBuffer, ACE_TCHAR* pTimeStamp, int nTimeStampSize, int* pWidth, int* pHeight, int* Length);
 
 int main(int argc, char *argv[])
 {
@@ -44,40 +47,23 @@ int main(int argc, char *argv[])
 	else
 		ACE_DEBUG((LM_DEBUG, "(%P|%t) connected to %s \n", remote_addr.get_host_name()));
 
-	int nRtn = 0, nIter=0;
-	char buffer[SIZE_BUF];
-	int nHeaderSize = (sizeof(ACE_Time_Value) + 3 * sizeof(int));
-	ACE_DEBUG((LM_DEBUG, "header size:%d\n", nHeaderSize));
-
+	ACE_TCHAR timeStamp[TIMESTAMP_SIZE];
 	_u8* pRawBuffer = new _u8[REF_AREA*RGBA_KIND * 2];
-	while (true){
-		if ((nRtn = client_stream.recv_n(buffer, nHeaderSize)) == -1) {
-			ACE_ERROR((LM_ERROR, "(%P|%t) Error in reading header, recv_n(%d)\n", nRtn));
-			break;
-		}
+	while (1)
+	{
+		int nGet = client_stream.recv_n(pRawBuffer, HEADER_SIZE);
+		ACE_ASSERT(nGet == HEADER_SIZE);
 
-		char* p = buffer;
-		ACE_Time_Value tv = ACE_OS::gettimeofday();
+		int nWidth, nHeight, nLength;
+		parseHeader(pRawBuffer, timeStamp, TIMESTAMP_SIZE, &nWidth, &nHeight, &nLength);
 
-		//ACE_OS::memcpy(&tv, p, sizeof(ACE_Time_Value)); p += sizeof(ACE_Time_Value);
-		ACE_Date_Time dt;
-		dt.update(tv);
-		ACE_DEBUG((LM_DEBUG, "%02d-%02d %02d:%02d:%02d.%06d\n",dt.month(),dt.day(),dt.hour(),dt.minute(),dt.second(),dt.microsec()));
-
-		int nWidth = 576;
-		int nHeight = 1024;
-		int nLength = 57054;
-		/*
-		ACE_OS::memcpy(&nWidth, p, sizeof(int)); p += sizeof(int);
-		nWidth = ntohs(nWidth);
-
-		ACE_OS::memcpy(&nHeight, p, sizeof(int)); p += sizeof(int);
-		ACE_OS::memcpy(&nLength, p, sizeof(int)); p += sizeof(int);
-		ACE_DEBUG((LM_DEBUG, "width:%d height:%d length:%d\n", nWidth, nHeight, nLength));
-		*/
-
-		int nGet = get_frame(pRawBuffer, nLength, client_stream);
+		nGet = get_frame(pRawBuffer+HEADER_SIZE, nLength, client_stream);
 		ACE_ASSERT(nGet == nLength);
+
+		ACE_Date_Time dt;
+		dt.update(ACE_OS::gettimeofday());
+		ACE_DEBUG((LM_DEBUG, "Cap %s w(%d) h(%d) length(%d)\n",timeStamp,nWidth,nHeight,nLength));
+		ACE_DEBUG((LM_DEBUG, "Rcv %d-%02d-%02d %02d:%02d:%02d.%06d\n", dt.year(),dt.month(), dt.day(), dt.hour(), dt.minute(), dt.second(), dt.microsec()));
 	}
 	delete[] pRawBuffer;
 
@@ -103,4 +89,14 @@ int get_frame(_u8* p, _u32 fbiSize, ACE_SOCK_Stream& client_stream)
 		if (fb_size - total_read < buff_size) read_size = fb_size - total_read;
 	}
 	return total_read;
+}
+
+void parseHeader(const _u8* pBuffer, ACE_TCHAR* pTimeStamp,int nTimeStampSize, int* pWidth, int* pHeight,int* pLength)
+{
+	const _u8* p = pBuffer;
+
+	ACE_OS::memcpy(pTimeStamp, p, nTimeStampSize); p += nTimeStampSize;
+	ACE_OS::memcpy(pWidth, p, sizeof(int)); p += sizeof(int);
+	ACE_OS::memcpy(pHeight, p, sizeof(int)); p += sizeof(int);
+	ACE_OS::memcpy(pLength, p, sizeof(int)); p += sizeof(int);
 }
