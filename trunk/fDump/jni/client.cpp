@@ -6,7 +6,9 @@
 #include "ace/OS_NS_string.h" 
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_stdlib.h"
+#include "ace/OS_NS_time.h"
 #include "ace/Date_Time.h"
+#include "ace/OS.h"
 
 #define SIZE_BUF (1024*4)
 #define REF_WIDTH 1440
@@ -55,17 +57,24 @@ int main(int argc, char *argv[])
 		}
 
 		char* p = buffer;
-		ACE_Time_Value tv;
-		ACE_OS::memcpy(&tv, p, sizeof(ACE_Time_Value)); p += sizeof(ACE_Time_Value);
+		ACE_Time_Value tv = ACE_OS::gettimeofday();
+
+		//ACE_OS::memcpy(&tv, p, sizeof(ACE_Time_Value)); p += sizeof(ACE_Time_Value);
 		ACE_Date_Time dt;
 		dt.update(tv);
-		ACE_DEBUG((LM_DEBUG, "dt.year:%d dt.month:%d\n", dt.year(), dt.month()));
+		ACE_DEBUG((LM_DEBUG, "%02d-%02d %02d:%02d:%02d .%d\n",dt.month(),dt.day(),dt.hour(),dt.minute(),dt.second(),dt.microsec()));
 
-		int nWidth, nHeight, nLength;
+		int nWidth = 576;
+		int nHeight = 1024;
+		int nLength = 57054;
+		/*
 		ACE_OS::memcpy(&nWidth, p, sizeof(int)); p += sizeof(int);
+		nWidth = ntohs(nWidth);
+
 		ACE_OS::memcpy(&nHeight, p, sizeof(int)); p += sizeof(int);
 		ACE_OS::memcpy(&nLength, p, sizeof(int)); p += sizeof(int);
 		ACE_DEBUG((LM_DEBUG, "width:%d height:%d length:%d\n", nWidth, nHeight, nLength));
+		*/
 
 		int nGet = get_frame(pRawBuffer, nLength, client_stream);
 		ACE_ASSERT(nGet == nLength);
