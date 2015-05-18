@@ -20,6 +20,8 @@
 #define RESIZE_WIDTH 576
 #define RESIZE_HEIGHT 1024 
 
+#define TIMESTAMP_SIZE 27
+
 CCapTask::CCapTask()
 :m_pQ(NULL),m_bRun(false),m_pRawBuffer(NULL),m_pResizeBuffer(NULL)
 {
@@ -50,11 +52,13 @@ int CCapTask::svc(void)
 
   time_t clock;
   FILE* fp;
+  ACE_TCHAR now[TIMESTAMP_SIZE];
   ACE_Message_Block* message;
   while(m_bRun){
     ACE_OS::time(&clock);
     struct tm *tm = ACE_OS::localtime(&clock);
     ACE_Time_Value tv = ACE_OS::gettimeofday();
+    ACE::timestamp(now,sizeof(now));
     fp = popen("screencap","r");
     if(!fp) ACE_ERROR_RETURN((LM_ERROR,"%p\n","popen(screencap)"),-1); 
 
@@ -94,11 +98,11 @@ int CCapTask::svc(void)
 
       //Create header for the catpured data after resizing {timeValue+width+height+len}
       //Timestamp is the right time just before to call screencap
-      int nAllocSize = nResizedSize + (sizeof(ACE_Time_Value)+3*sizeof(int));
+      int nAllocSize = nResizedSize + (sizeof(now)+3*sizeof(int));
 
       ACE_NEW_RETURN(message,ACE_Message_Block(nAllocSize),-1);
-      ACE_OS::memcpy(message->wr_ptr(),&tv,sizeof(ACE_Time_Value));
-      message->wr_ptr(sizeof(ACE_Time_Value)); 
+      ACE_OS::memcpy(message->wr_ptr(),now,sizeof(now));
+      message->wr_ptr(sizeof(now)); 
       ACE_OS::memcpy(message->wr_ptr(),&resize_w,sizeof(int));
       message->wr_ptr(sizeof(int)); 
       ACE_OS::memcpy(message->wr_ptr(),&resize_h,sizeof(int));
