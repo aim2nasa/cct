@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
 	_u8* pRawBuffer = new _u8[REF_AREA*RGBA_KIND * 2];
 	while (1)
 	{
+		ACE_Time_Value tv = ACE_OS::gettimeofday();
 		int nGet = client_stream.recv_n(pRawBuffer, HEADER_SIZE);
 		ACE_ASSERT(nGet == HEADER_SIZE);
 
@@ -60,10 +61,20 @@ int main(int argc, char *argv[])
 		nGet = get_frame(pRawBuffer+HEADER_SIZE, nLength, client_stream);
 		ACE_ASSERT(nGet == nLength);
 
+		tv = ACE_OS::gettimeofday() - tv;
+
 		ACE_Date_Time dt;
 		dt.update(ACE_OS::gettimeofday());
-		ACE_DEBUG((LM_DEBUG, "Cap %s w(%d) h(%d) length(%d)\n",timeStamp,nWidth,nHeight,nLength));
+		ACE_DEBUG((LM_DEBUG, "Cap %s w(%d) h(%d) length(%d) %dms\n",timeStamp,nWidth,nHeight,nLength,tv.msec()));
 		//ACE_DEBUG((LM_DEBUG, "Rcv %d-%02d-%02d %02d:%02d:%02d.%06d\n", dt.year(),dt.month(), dt.day(), dt.hour(), dt.minute(), dt.second(), dt.microsec()));
+
+#ifdef _DELTA_T_DUMP
+		FILE* fDump = ACE_OS::fopen(ACE_TEXT("dt.txt"), ACE_TEXT("w+"));
+		ACE_TCHAR dtBuf[16];
+		ACE_OS::sprintf(dtBuf, ACE_TEXT(" %d"), tv.msec());
+		ACE_OS::fwrite(dtBuf, ACE_OS::strlen(dtBuf), 1, fDump);
+		ACE_OS::fclose(fDump);
+#endif
 	}
 	delete[] pRawBuffer;
 
