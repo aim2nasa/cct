@@ -25,30 +25,34 @@
 CCapTask::CCapTask()
 :m_pQ(NULL),m_bRun(false),m_pRawBuffer(NULL),m_pResizeBuffer(NULL)
 {
+  ACE_DEBUG((LM_DEBUG,"(%t) CCapTask constructor(0x%x)\n",this));
   m_pRawBuffer = new _u8[REF_AREA*RGBA_KIND*2]; //2 for redundancy
   m_pResizeBuffer = new _u8[REF_AREA*RESIZE_BYTE_PER_PIXEL*2]; //2 for redundancy
 }
 
 CCapTask::~CCapTask()
 {
+  ACE_DEBUG((LM_DEBUG,"(%t) CCapTask destructor(0x%x)\n",this));
   delete [] m_pResizeBuffer;
   delete [] m_pRawBuffer;
 }
 
 int CCapTask::start()
 {
+  ACE_DEBUG((LM_DEBUG,"(%t) CCapTask starting..\n",this));
   m_bRun = true;
   return this->activate(); 
 }
 
 void CCapTask::stop()
 {
+  ACE_DEBUG((LM_DEBUG,"(%t) CCapTask stopping..\n",this));
   m_bRun = false;
 }
 
 int CCapTask::svc(void)
 {
-  ACE_DEBUG((LM_DEBUG,"(%t) svc start\n"));
+  ACE_DEBUG((LM_DEBUG,"(%t) CCapTask::svc start\n"));
 
   time_t clock;
   FILE* fp;
@@ -126,7 +130,7 @@ int CCapTask::svc(void)
     ACE_NEW_RETURN(message,ACE_Message_Block(0,ACE_Message_Block::MB_HANGUP),-1);
     m_pQ->enqueue(message);
   }
-  ACE_DEBUG((LM_DEBUG,"(%t) svc end\n"));
+  ACE_DEBUG((LM_DEBUG,"(%t) CCapTask::svc end\n"));
   return 0;
 }
 

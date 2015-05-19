@@ -3,15 +3,17 @@
 
 CNullTask::CNullTask()
 {
+  ACE_DEBUG((LM_DEBUG,"(%t) CNullTask constructor(0x%x)\n",this));
 }
 
 CNullTask::~CNullTask()
 {
+  ACE_DEBUG((LM_DEBUG,"(%t) CNullTask destructor(0x%x)\n",this));
 }
 
 int CNullTask::svc(void)
 {
-  ACE_DEBUG((LM_DEBUG,"(%t) svc start\n"));
+  ACE_DEBUG((LM_DEBUG,"(%t) CNullTask::svc start\n"));
 
   ACE_Message_Block *message;
   for(;;){
@@ -19,7 +21,7 @@ int CNullTask::svc(void)
 
     if(message->msg_type()==ACE_Message_Block::MB_HANGUP) {
       message->release();
-      ACE_DEBUG((LM_DEBUG,"(%t) MB_HANGUP received\n"));
+      ACE_DEBUG((LM_DEBUG,"(%t) CNullTask::svc MB_HANGUP received\n"));
       break;
     }
 
@@ -28,6 +30,6 @@ int CNullTask::svc(void)
     message->release();
     //ACE_DEBUG((LM_DEBUG,"(%t) Q(%d)\n",this->msg_queue()->message_count()));
   }
-  ACE_DEBUG((LM_DEBUG,"(%t) svc end\n"));
+  ACE_DEBUG((LM_DEBUG,"(%t) CNullTask::svc end\n"));
   return 0;
 }
