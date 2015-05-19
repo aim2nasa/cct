@@ -13,19 +13,21 @@
 CZcTask::CZcTask()
 :m_pQ(NULL),m_pGivenBuffer(NULL),m_pCompBuffer(NULL)
 {
+  ACE_DEBUG((LM_DEBUG,"(%t) CZcTask constructor(0x%x)\n",this));
   m_pGivenBuffer = new _u8[RAW_WIDTH*RAW_HEIGHT*RAW_BYTE_PER_PIXEL];
   m_pCompBuffer = new _u8[RAW_WIDTH*RAW_HEIGHT*RAW_BYTE_PER_PIXEL*2]; //2 for redundancy
 }
 
 CZcTask::~CZcTask()
 {
+  ACE_DEBUG((LM_DEBUG,"(%t) CZcTask destructor(0x%x)\n",this));
   delete [] m_pCompBuffer;
   delete [] m_pGivenBuffer;
 }
 
 int CZcTask::svc(void)
 {
-  ACE_DEBUG((LM_DEBUG,"(%t) svc start\n"));
+  ACE_DEBUG((LM_DEBUG,"(%t) CZcTask::svc start\n"));
 
   ACE_TCHAR timeStamp[TIMESTAMP_SIZE];
   ACE_Message_Block *message;
@@ -34,7 +36,7 @@ int CZcTask::svc(void)
 
     if(message->msg_type()==ACE_Message_Block::MB_HANGUP) {
       message->release();
-      ACE_DEBUG((LM_DEBUG,"(%t) MB_HANGUP received\n"));
+      ACE_DEBUG((LM_DEBUG,"(%t) CZcTask::svc MB_HANGUP received\n"));
       break;
     }
 
@@ -104,6 +106,6 @@ int CZcTask::svc(void)
     ACE_NEW_RETURN(message,ACE_Message_Block(0,ACE_Message_Block::MB_HANGUP),-1);
     m_pQ->enqueue(message);
   }
-  ACE_DEBUG((LM_DEBUG,"(%t) svc end\n"));
+  ACE_DEBUG((LM_DEBUG,"(%t) CZcTask::svc end\n"));
   return 0;
 }
