@@ -41,6 +41,7 @@ int CStreamHandler::handle_input(ACE_HANDLE handle)
 	char buf[1024];
 	ssize_t recv_cnt;
 	if ((recv_cnt = this->peer().recv(buf, 1024)) <= 0) {
+		m_pZcTask->m_pQ = NULL;	//to avoid ZcTask to put MB_HANGUP to handler thread
 		m_pCapTask->stop();
 		m_pCapTask->wait();
 		m_pZcTask->wait();
