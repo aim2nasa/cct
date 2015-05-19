@@ -19,5 +19,6 @@ LOCAL_LDFLAGS:=-fPIE -pie
 LOCAL_SHARED_LIBRARIES := libACE
 LOCAL_LDLIBS += -lz
 LOCAL_C_INCLUDES += /home/skwak/ACE_wrappers \ /home/skwak/cct/fCap
+LOCAL_CFLAGS := -DACE_NTRACE=1
 
 include $(BUILD_EXECUTABLE)
