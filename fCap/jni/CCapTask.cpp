@@ -59,6 +59,7 @@ int CCapTask::svc(void)
   ACE_TCHAR now[TIMESTAMP_SIZE];
   ACE_Message_Block* message;
   while(m_bRun){
+    ACE_TString str;
     ACE_OS::time(&clock);
     struct tm *tm = ACE_OS::localtime(&clock);
     ACE_Time_Value tv = ACE_OS::gettimeofday();
@@ -72,7 +73,7 @@ int CCapTask::svc(void)
     if(fread(&w,1,sizeof(w),fp)!=sizeof(w)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(w)"),-1);
     if(fread(&h,1,sizeof(h),fp)!=sizeof(h)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(h)"),-1);
     if(fread(&f,1,sizeof(f),fp)!=sizeof(f)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(f)"),-1);
-    ACE_DEBUG((LM_DEBUG,"[%d:%02d:%02d] w(%d) h(%d) f(%d)",tm->tm_hour,tm->tm_min,tm->tm_sec,w,h,f));
+    ACE_DEBUG((LM_DEBUG,"(%t)[%d:%02d:%02d]",tm->tm_hour,tm->tm_min,tm->tm_sec));
 
     struct fbinfo fbi;
     int nSurfInfo = get_surface_info(fbi,w,h,f);
