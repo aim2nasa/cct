@@ -59,7 +59,7 @@ int CCapTask::svc(void)
     struct tm *tm = ACE_OS::localtime(&clock);
     ACE_Time_Value tv = ACE_OS::gettimeofday();
     ACE::timestamp(now,sizeof(now));
-    ACE_DEBUG ((LM_DEBUG, "CapTask:%s\n", now));
+    //ACE_DEBUG ((LM_DEBUG, "CapTask:%s\n", now));
 
     fp = popen("screencap","r");
     if(!fp) ACE_ERROR_RETURN((LM_ERROR,"%p\n","popen(screencap)"),-1); 
@@ -83,7 +83,7 @@ int CCapTask::svc(void)
 
     int nRead = get_raw_buffer(m_pRawBuffer,fbi.size,fp);
     ACE_ASSERT(nRead==fbi.size);
-    ACE_DEBUG((LM_DEBUG," BUF",nRead));
+    //ACE_DEBUG((LM_DEBUG," BUF",nRead));
     pclose(fp);
 
     if(m_pQ) {
