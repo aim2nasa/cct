@@ -42,13 +42,13 @@ int CZcTask::svc(void)
     char* p = message->rd_ptr();
 
     ACE_OS::memcpy(timeStamp, p, sizeof(timeStamp)); p += sizeof(timeStamp);
-    ACE_DEBUG ((LM_DEBUG, "CZcTask:%s\n", timeStamp));
+    //ACE_DEBUG ((LM_DEBUG, "CZcTask:%s\n", timeStamp));
 
     int nWidth, nHeight, nLength;
     ACE_OS::memcpy(&nWidth, p, sizeof(int)); p += sizeof(int);
     ACE_OS::memcpy(&nHeight, p, sizeof(int)); p += sizeof(int);
     ACE_OS::memcpy(&nLength, p, sizeof(int)); p += sizeof(int); 
-    ACE_DEBUG((LM_DEBUG,"width:%d height:%d length:%d\n",nWidth,nHeight,nLength));
+    //ACE_DEBUG((LM_DEBUG,"width:%d height:%d length:%d\n",nWidth,nHeight,nLength));
 
 
 
@@ -64,7 +64,7 @@ int CZcTask::svc(void)
     int nRtn = compress2(m_pCompBuffer,(uLongf*)&cmp_buffer_size,raw_buffer,raw_buffer_size,COMPRESS_LEVEL);
     switch(nRtn){
 	case Z_OK:
-          ACE_DEBUG((LM_DEBUG,"\n<%d->%d>\n",message->size(),cmp_buffer_size));
+          //ACE_DEBUG((LM_DEBUG,"\n<%d->%d>\n",message->size(),cmp_buffer_size));
 	  if(m_pQ){
 	    ACE_Message_Block *cmp_message;	
             ACE_NEW_RETURN(cmp_message,ACE_Message_Block(cmp_buffer_size+headerSize),-1);
