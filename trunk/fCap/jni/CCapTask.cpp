@@ -21,6 +21,7 @@
 #define RESIZE_HEIGHT 1024 
 
 #define TIMESTAMP_SIZE 27
+#define MAX_LOGMSG 512
 
 CCapTask::CCapTask()
 :m_pQ(NULL),m_bRun(false),m_pRawBuffer(NULL),m_pResizeBuffer(NULL)
@@ -57,6 +58,7 @@ int CCapTask::svc(void)
   time_t clock;
   FILE* fp;
   ACE_TCHAR now[TIMESTAMP_SIZE];
+  ACE_TCHAR msg[MAX_LOGMSG];
   ACE_Message_Block* message;
   while(m_bRun){
     ACE_TString str;
@@ -64,7 +66,6 @@ int CCapTask::svc(void)
     struct tm *tm = ACE_OS::localtime(&clock);
     ACE_Time_Value tv = ACE_OS::gettimeofday();
     ACE::timestamp(now,sizeof(now));
-    //ACE_DEBUG ((LM_DEBUG, "CapTask:%s\n", now));
 
     fp = popen("screencap","r");
     if(!fp) ACE_ERROR_RETURN((LM_ERROR,"%p\n","popen(screencap)"),-1); 
@@ -73,22 +74,22 @@ int CCapTask::svc(void)
     if(fread(&w,1,sizeof(w),fp)!=sizeof(w)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(w)"),-1);
     if(fread(&h,1,sizeof(h),fp)!=sizeof(h)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(h)"),-1);
     if(fread(&f,1,sizeof(f),fp)!=sizeof(f)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(f)"),-1);
-    ACE_DEBUG((LM_DEBUG,"(%t) [%d:%02d:%02d]",tm->tm_hour,tm->tm_min,tm->tm_sec));
+
+    ACE_OS::sprintf(msg,ACE_TEXT("[%d:%02d:%02d]"),tm->tm_hour,tm->tm_min,tm->tm_sec);
+    str+=ACE_TEXT(msg);
 
     struct fbinfo fbi;
     int nSurfInfo = get_surface_info(fbi,w,h,f);
     ACE_ASSERT(nSurfInfo!=-1);
 
-    ACE_DEBUG((LM_DEBUG," bpp:%d sz:(%d) w:%d h:%d",fbi.bpp,fbi.size,fbi.width,fbi.height));
-    ACE_DEBUG((LM_DEBUG," R(%d,%d) G(%d,%d) B(%d,%d) A(%d,%d)",
-              fbi.red_offset,fbi.red_length,
-              fbi.green_offset,fbi.green_length,
-              fbi.blue_offset,fbi.blue_length,
-              fbi.alpha_offset,fbi.alpha_length));  
+    ACE_OS::sprintf(msg,ACE_TEXT(" bpp:%d sz:(%d) w:%d h:%d R(%d,%d) G(%d,%d) B(%d,%d) A(%d,%d)"),
+	fbi.bpp,fbi.size,fbi.width,fbi.height,fbi.red_offset,fbi.red_length,
+	fbi.green_offset,fbi.green_length,fbi.blue_offset,fbi.blue_length,
+	fbi.alpha_offset,fbi.alpha_length);  
+    str+=ACE_TEXT(msg);
 
     int nRead = get_raw_buffer(m_pRawBuffer,fbi.size,fp);
     ACE_ASSERT(nRead==fbi.size);
-    //ACE_DEBUG((LM_DEBUG," BUF",nRead));
     pclose(fp);
 
     if(m_pQ) {
@@ -124,7 +125,9 @@ int CCapTask::svc(void)
     }
 
     tv = ACE_OS::gettimeofday() - tv;
-    ACE_DEBUG((LM_DEBUG," %dms\n",tv.msec()));
+    ACE_OS::sprintf(msg,ACE_TEXT(" %dms"),tv.msec());
+    str+=ACE_TEXT(msg);
+    ACE_DEBUG((LM_DEBUG,"%s\n",str.c_str()));
   }
 
   if(m_pQ) {
