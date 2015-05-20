@@ -63,9 +63,9 @@ int CCapTask::svc(void)
   while(m_bRun){
     ACE_TString str;
     ACE_OS::time(&clock);
-    struct tm *tm = ACE_OS::localtime(&clock);
     ACE_Time_Value tv = ACE_OS::gettimeofday();
     ACE::timestamp(now,sizeof(now));
+    str=ACE_TEXT(now);
 
     fp = popen("screencap","r");
     if(!fp) ACE_ERROR_RETURN((LM_ERROR,"%p\n","popen(screencap)"),-1); 
@@ -74,9 +74,6 @@ int CCapTask::svc(void)
     if(fread(&w,1,sizeof(w),fp)!=sizeof(w)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(w)"),-1);
     if(fread(&h,1,sizeof(h),fp)!=sizeof(h)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(h)"),-1);
     if(fread(&f,1,sizeof(f),fp)!=sizeof(f)) ACE_ERROR_RETURN((LM_ERROR,"%p\n","fread(f)"),-1);
-
-    ACE_OS::sprintf(msg,ACE_TEXT("[%d:%02d:%02d]"),tm->tm_hour,tm->tm_min,tm->tm_sec);
-    str+=ACE_TEXT(msg);
 
     struct fbinfo fbi;
     int nSurfInfo = get_surface_info(fbi,w,h,f);
