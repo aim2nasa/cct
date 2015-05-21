@@ -35,10 +35,12 @@ int CRestoreTask::svc(void)
 		}
 
 		int nWidth, nHeight, nLength;
-		int nGet = parseHeader(reinterpret_cast<const _u8*>(message->rd_ptr()), dvTime, pcTime, TIMESTAMP_SIZE, &nWidth, &nHeight, &nLength);
-		ACE_ASSERT(nGet == HEADER_SIZE+TIMESTAMP_SIZE);
+		int nHeaderSize = parseHeader(reinterpret_cast<const _u8*>(message->rd_ptr()), dvTime, pcTime, TIMESTAMP_SIZE, &nWidth, &nHeight, &nLength);
+		ACE_ASSERT(nHeaderSize == (HEADER_SIZE+TIMESTAMP_SIZE));	//PC에서 수신후 붙인 타임스탬프로 인해 증가
 
 		ACE_DEBUG((LM_DEBUG, "S:C:R:w:h:l(%d:%s:%s:%d:%d:%d)\n", message->size(), dvTime, pcTime, nWidth, nHeight, nLength));
+		restore(reinterpret_cast<const _u8*>(message->rd_ptr() + nHeaderSize), nLength, nWidth, nHeight, 24);
+
 		message->release();
 	}
 	ACE_DEBUG((LM_DEBUG, "(%t) CRestoreTask::svc end\n"));
@@ -47,5 +49,9 @@ int CRestoreTask::svc(void)
 
 int CRestoreTask::restore(const _u8* compress_buffer, const _u32 compress_buffer_len, const _u16 width, const _u16 height, const _u32 bpp)
 {
+	uLongf uDecompBufferLen = 0;
+	uncompress((Bytef*)m_pDecompBuffer, &uDecompBufferLen, (Bytef*)compress_buffer, compress_buffer_len);
+	//ACE_ASSERT(uDecompBufferLen > 0);
+
 	return 0;
 }
