@@ -2,6 +2,7 @@
 #include "utility.h"
 #include "fMacro.h"
 #include "zlib.h"
+#include "ace/Lib_Find.h"
 
 #define BUFFER_SIZE	(16*1024*1024)	//16MB
 
@@ -39,7 +40,7 @@ int CRestoreTask::svc(void)
 		ACE_ASSERT(nHeaderSize == (HEADER_SIZE+TIMESTAMP_SIZE));	//PC에서 수신후 붙인 타임스탬프로 인해 증가
 
 		ACE_DEBUG((LM_DEBUG, "S:C:R:w:h:l(%d:%s:%s:%d:%d:%d)\n", message->size(), dvTime, pcTime, nWidth, nHeight, nLength));
-		restore(reinterpret_cast<const _u8*>(message->rd_ptr() + nHeaderSize), nLength, nWidth, nHeight, 24);
+		restore(dvTime,pcTime,reinterpret_cast<const _u8*>(message->rd_ptr() + nHeaderSize), nLength, nWidth, nHeight, 24);
 
 		message->release();
 	}
@@ -47,7 +48,7 @@ int CRestoreTask::svc(void)
 	return 0;
 }
 
-int CRestoreTask::restore(const _u8* compress_buffer, const _u32 compress_buffer_len, const _u16 width, const _u16 height, const _u32 bpp)
+int CRestoreTask::restore(ACE_TCHAR* pDvTime, ACE_TCHAR* pPcTime, const _u8* compress_buffer, const _u32 compress_buffer_len, const _u16 width, const _u16 height, const _u32 bpp)
 {
 	uLongf uDecompBufferLen = BUFFER_SIZE;
 	uncompress((Bytef*)m_pDecompBuffer, &uDecompBufferLen, (Bytef*)compress_buffer, compress_buffer_len);
@@ -55,6 +56,11 @@ int CRestoreTask::restore(const _u8* compress_buffer, const _u32 compress_buffer
 
 	invert_data(m_pDecompBuffer,m_pInvertBuffer, width, height, bpp);
 
+	ACE_TCHAR fileName[512];
+	ACE_OS::sprintf(fileName, "C%s_R%s_whls(%d_%d_%d_%d).bmp", pDvTime, pPcTime, width, height, compress_buffer_len);
+	ACE::strrepl(fileName, ':', '_');
+
+	write_bmp(fileName, m_pInvertBuffer, width, height, bpp);
 	return 0;
 }
 
@@ -65,4 +71,50 @@ void CRestoreTask::invert_data(const _u8* in_buffer, _u8* out_buffer, const _u16
 
 	while(j--)
 		memcpy(&out_buffer[width*pixel_per_bytes*i++], &in_buffer[width*pixel_per_bytes*j], width*pixel_per_bytes);
+}
+
+int CRestoreTask::write_bmp(ACE_TCHAR* pFileName, _u8* buffer, const _u16 width, const _u16 height, const _u32 bpp)
+{
+	FILE *f = ACE_OS::fopen(pFileName, ACE_TEXT("wb"));
+	ACE_ASSERT(f!=NULL);
+
+	BITMAPFILEHEADER bmf;
+	BITMAPINFOHEADER bmi;
+	memset(&bmf, 0, sizeof(bmf));
+	memset(&bmi, 0, sizeof(bmi));
+
+	bmi.biSize = sizeof(bmi);
+	bmi.biSizeImage = width * height * (bpp / 8);
+	bmi.biWidth = width;
+	bmi.biHeight = height;
+	bmi.biPlanes = 1;
+	bmi.biBitCount = bpp;
+	bmi.biCompression = BI_RGB;
+
+	bmf.bfType = /*'B' + ('M' << 8)*/0x4D42;
+	bmf.bfOffBits = sizeof(bmf) + bmi.biSize;
+	bmf.bfSize = bmf.bfOffBits + bmi.biSizeImage;
+
+	size_t nWrite;
+	nWrite = ACE_OS::fwrite(&bmf,1,sizeof(bmf), f);
+	ACE_ASSERT(nWrite == sizeof(bmf));
+
+	nWrite = ACE_OS::fwrite(&bmi,1,sizeof(bmi), f);
+	ACE_ASSERT(nWrite == sizeof(bmi));
+
+	static unsigned char _zero = 0x00;
+	int padding = (width * (bpp / 8)) % 4;
+
+	if (padding) {
+		for (int i = 0; i < height; ++i){
+			nWrite = ACE_OS::fwrite(buffer + (width * (bpp / 8) * i), width * (bpp / 8), 1, f);
+
+			for (int j = 0; j < padding; ++j)
+				nWrite = ACE_OS::fwrite(&_zero, 1, 1, f);
+		}
+	}else {
+		nWrite = ACE_OS::fwrite(buffer, bmi.biSizeImage, 1, f);
+	}
+	ACE_OS::fclose(f);
+	return 0;
 }
