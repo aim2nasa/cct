@@ -53,5 +53,16 @@ int CRestoreTask::restore(const _u8* compress_buffer, const _u32 compress_buffer
 	uncompress((Bytef*)m_pDecompBuffer, &uDecompBufferLen, (Bytef*)compress_buffer, compress_buffer_len);
 	ACE_ASSERT(uDecompBufferLen > 0);
 
+	invert_data(m_pDecompBuffer,m_pInvertBuffer, width, height, bpp);
+
 	return 0;
+}
+
+void CRestoreTask::invert_data(const _u8* in_buffer, _u8* out_buffer, const _u16 width, const _u16 height, const _u32 bpp)
+{
+	_u16 i = 0, j = height;
+	_u32 pixel_per_bytes = bpp / 8;
+
+	while(j--)
+		memcpy(&out_buffer[width*pixel_per_bytes*i++], &in_buffer[width*pixel_per_bytes*j], width*pixel_per_bytes);
 }
