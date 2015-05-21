@@ -2,6 +2,7 @@
 #include "ace/Log_Msg.h" 
 #include "ace/OS.h"
 #include "utility.h"
+#include "CRestoreTask.h"
 
 #define SIZE_BUF (1024*4)
 #define REF_WIDTH 1440
@@ -30,6 +31,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 	else
 		ACE_DEBUG((LM_DEBUG, "(%P|%t) connected to %s \n", remote_addr.get_host_name()));
 
+	CRestoreTask rt;
+	ACE_Message_Queue<ACE_MT_SYNCH>* m_pQ = rt.msg_queue();
+	rt.activate();
+
+	ACE_Message_Block *message;
 	ACE_TCHAR pcTime[TIMESTAMP_SIZE];	//pc에서 스트림을 수신한 PC기준 시간
 	ACE_TCHAR dvTime[TIMESTAMP_SIZE];	//단말에서 캡처하는 시점의 단말기준 시간
 	_u8* pRawBuffer = new _u8[REF_AREA*RGBA_KIND * 2];
@@ -40,7 +46,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 		ACE_ASSERT(nGet == HEADER_SIZE);
 
 		int nWidth, nHeight, nLength;
-		parseHeader(pRawBuffer, dvTime, TIMESTAMP_SIZE, &nWidth, &nHeight, &nLength);
+		nGet = parseHeader(pRawBuffer, dvTime, TIMESTAMP_SIZE, &nWidth, &nHeight, &nLength);
+		ACE_ASSERT(nGet == HEADER_SIZE);
 
 		nGet = get_frame(pRawBuffer+HEADER_SIZE, nLength, client_stream);
 		ACE_ASSERT(nGet == nLength);
@@ -49,8 +56,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 		tv = nowTv - tv;
 
 		ACE::timestamp(nowTv, pcTime, sizeof(pcTime));
-
 		ACE_DEBUG((LM_DEBUG, "CapDv(%s) RcvPc(%s) w(%d) h(%d) length(%d) %dms\n", dvTime, pcTime, nWidth, nHeight, nLength, tv.msec()));
+
+		ACE_NEW_RETURN(message, ACE_Message_Block(HEADER_SIZE + nLength + TIMESTAMP_SIZE), -1);	//PC time stamp를 추가
+		ACE_OS::memcpy(message->wr_ptr(), dvTime, TIMESTAMP_SIZE);
+		message->wr_ptr(TIMESTAMP_SIZE);
+		ACE_OS::memcpy(message->wr_ptr(), pcTime, TIMESTAMP_SIZE);
+		message->wr_ptr(TIMESTAMP_SIZE);
+		ACE_OS::memcpy(message->wr_ptr(), pRawBuffer+TIMESTAMP_SIZE, nLength+HEADER_SIZE-TIMESTAMP_SIZE);
+		message->wr_ptr(nLength+HEADER_SIZE-TIMESTAMP_SIZE);
+
+		ACE_ASSERT(m_pQ);
+		m_pQ->enqueue(message);
 	}
 	delete[] pRawBuffer;
 
