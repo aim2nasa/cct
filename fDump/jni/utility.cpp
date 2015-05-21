@@ -31,3 +31,16 @@ int parseHeader(const _u8* pBuffer, ACE_TCHAR* pTimeStamp, int nTimeStampSize, i
 
 	return nTimeStampSize + sizeof(int) * 3;
 }
+
+int parseHeader(const _u8* pBuffer, ACE_TCHAR* pDvTimeStamp, ACE_TCHAR* pPcTimeStamp, int nTimeStampSize, int* pWidth, int* pHeight, int* pLength)
+{
+	const _u8* p = pBuffer;
+
+	ACE_OS::memcpy(pDvTimeStamp, p, nTimeStampSize); p += nTimeStampSize;
+	ACE_OS::memcpy(pPcTimeStamp, p, nTimeStampSize); p += nTimeStampSize;
+	ACE_OS::memcpy(pWidth, p, sizeof(int)); p += sizeof(int);
+	ACE_OS::memcpy(pHeight, p, sizeof(int)); p += sizeof(int);
+	ACE_OS::memcpy(pLength, p, sizeof(int)); p += sizeof(int);
+
+	return (nTimeStampSize*2) + (sizeof(int) * 3);
+}
