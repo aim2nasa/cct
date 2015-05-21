@@ -1,12 +1,5 @@
-#include <iostream>
 #include "ace/SOCK_Connector.h" 
-#include "ace/INET_Addr.h" 
 #include "ace/Log_Msg.h" 
-#include "ace/OS_NS_stdio.h" 
-#include "ace/OS_NS_string.h" 
-#include "ace/OS_NS_unistd.h"
-#include "ace/OS_NS_stdlib.h"
-#include "ace/OS_NS_time.h"
 #include "ace/Date_Time.h"
 #include "ace/OS.h"
 #include "utility.h"
