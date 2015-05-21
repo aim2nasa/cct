@@ -2,6 +2,21 @@
 #include "utility.h"
 #include "fMacro.h"
 
+#define BUFFER_SIZE	(16*1024*1024)	//16MB
+
+CRestoreTask::CRestoreTask()
+	:m_pDecompBuffer(NULL), m_pInvertBuffer(NULL)
+{
+	m_pDecompBuffer = new _u8[BUFFER_SIZE];
+	m_pInvertBuffer = new _u8[BUFFER_SIZE];
+}
+
+CRestoreTask::~CRestoreTask()
+{
+	delete [] m_pInvertBuffer;
+	delete [] m_pDecompBuffer;
+}
+
 int CRestoreTask::svc(void)
 {
 	ACE_DEBUG((LM_DEBUG, "(%t) CRestoreTask::svc start\n"));
@@ -26,5 +41,10 @@ int CRestoreTask::svc(void)
 		message->release();
 	}
 	ACE_DEBUG((LM_DEBUG, "(%t) CRestoreTask::svc end\n"));
+	return 0;
+}
+
+int CRestoreTask::restore(const _u8* compress_buffer, const _u32 compress_buffer_len, const _u16 width, const _u16 height, const _u32 bpp)
+{
 	return 0;
 }
