@@ -12,9 +12,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\fDump\jni\client.cpp" />
+    <ClCompile Include="..\..\fDump\jni\CRestoreTask.cpp" />
     <ClCompile Include="..\..\fDump\jni\utility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\fDump\jni\CRestoreTask.h" />
     <ClInclude Include="..\..\fDump\jni\fType.h" />
     <ClInclude Include="..\..\fDump\jni\utility.h" />
   </ItemGroup>
