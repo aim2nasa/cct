@@ -50,8 +50,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
 		ACE::timestamp(nowTv, pcTime, sizeof(pcTime));
 
-		ACE_DEBUG((LM_DEBUG, "%s w(%d) h(%d) length(%d) %dms\n", dvTime, nWidth, nHeight, nLength, tv.msec()));
-		ACE_DEBUG((LM_DEBUG, "%s\n",pcTime));
+		ACE_DEBUG((LM_DEBUG, "CapDv(%s) RcvPc(%s) w(%d) h(%d) length(%d) %dms\n", dvTime, pcTime, nWidth, nHeight, nLength, tv.msec()));
 	}
 	delete[] pRawBuffer;
 
