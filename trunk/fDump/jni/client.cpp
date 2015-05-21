@@ -3,14 +3,7 @@
 #include "ace/OS.h"
 #include "utility.h"
 #include "CRestoreTask.h"
-
-#define SIZE_BUF (1024*4)
-#define REF_WIDTH 1440
-#define REF_HEIGHT 2560
-#define REF_AREA (REF_WIDTH*REF_HEIGHT)
-#define RGBA_KIND  4
-#define TIMESTAMP_SIZE 27
-#define HEADER_SIZE 39	//Timestamp(27)+width(4)+height(4)+length(4)
+#include "fMacro.h"
 
 static char* SERVER_HOST = "127.0.0.1";
 static u_short SERVER_PORT = 19001;

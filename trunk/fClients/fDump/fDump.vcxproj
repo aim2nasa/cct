@@ -17,6 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\fDump\jni\CRestoreTask.h" />
+    <ClInclude Include="..\..\fDump\jni\fMacro.h" />
     <ClInclude Include="..\..\fDump\jni\fType.h" />
     <ClInclude Include="..\..\fDump\jni\utility.h" />
   </ItemGroup>
