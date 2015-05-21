@@ -31,7 +31,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 	else
 		ACE_DEBUG((LM_DEBUG, "(%P|%t) connected to %s \n", remote_addr.get_host_name()));
 
-	ACE_TCHAR timeStamp[TIMESTAMP_SIZE];
+	ACE_TCHAR pcTime[TIMESTAMP_SIZE];	//pc에서 스트림을 수신한 PC기준 시간
+	ACE_TCHAR dvTime[TIMESTAMP_SIZE];	//단말에서 캡처하는 시점의 단말기준 시간
 	_u8* pRawBuffer = new _u8[REF_AREA*RGBA_KIND * 2];
 	while (1)
 	{
@@ -40,17 +41,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 		ACE_ASSERT(nGet == HEADER_SIZE);
 
 		int nWidth, nHeight, nLength;
-		parseHeader(pRawBuffer, timeStamp, TIMESTAMP_SIZE, &nWidth, &nHeight, &nLength);
+		parseHeader(pRawBuffer, dvTime, TIMESTAMP_SIZE, &nWidth, &nHeight, &nLength);
 
 		nGet = get_frame(pRawBuffer+HEADER_SIZE, nLength, client_stream);
 		ACE_ASSERT(nGet == nLength);
 
-		tv = ACE_OS::gettimeofday() - tv;
+		ACE_Time_Value nowTv = ACE_OS::gettimeofday();
+		tv = nowTv - tv;
 
-		ACE_Date_Time dt;
-		dt.update(ACE_OS::gettimeofday());
-		ACE_DEBUG((LM_DEBUG, "%s w(%d) h(%d) length(%d) %dms\n",timeStamp,nWidth,nHeight,nLength,tv.msec()));
-		//ACE_DEBUG((LM_DEBUG, "Rcv %d-%02d-%02d %02d:%02d:%02d.%06d\n", dt.year(),dt.month(), dt.day(), dt.hour(), dt.minute(), dt.second(), dt.microsec()));
+		ACE::timestamp(nowTv, pcTime, sizeof(pcTime));
+
+		ACE_DEBUG((LM_DEBUG, "%s w(%d) h(%d) length(%d) %dms\n", dvTime, nWidth, nHeight, nLength, tv.msec()));
+		ACE_DEBUG((LM_DEBUG, "%s\n",pcTime));
 	}
 	delete[] pRawBuffer;
 
