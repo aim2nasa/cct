@@ -12,6 +12,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\fDump\jni\client.cpp" />
+    <ClCompile Include="..\..\fDump\jni\utility.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\fDump\jni\fType.h" />
+    <ClInclude Include="..\..\fDump\jni\utility.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{EE6B58AC-4087-45A7-AD0B-084FDDAAF8B6}</ProjectGuid>
