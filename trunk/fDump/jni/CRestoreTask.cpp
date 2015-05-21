@@ -1,6 +1,7 @@
 #include "CRestoreTask.h"
 #include "utility.h"
 #include "fMacro.h"
+#include "zlib.h"
 
 #define BUFFER_SIZE	(16*1024*1024)	//16MB
 
