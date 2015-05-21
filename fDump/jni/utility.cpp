@@ -20,7 +20,7 @@ int get_frame(_u8* p, _u32 fbiSize, ACE_SOCK_Stream& client_stream)
 	return total_read;
 }
 
-void parseHeader(const _u8* pBuffer, ACE_TCHAR* pTimeStamp, int nTimeStampSize, int* pWidth, int* pHeight, int* pLength)
+int parseHeader(const _u8* pBuffer, ACE_TCHAR* pTimeStamp, int nTimeStampSize, int* pWidth, int* pHeight, int* pLength)
 {
 	const _u8* p = pBuffer;
 
@@ -28,4 +28,6 @@ void parseHeader(const _u8* pBuffer, ACE_TCHAR* pTimeStamp, int nTimeStampSize, 
 	ACE_OS::memcpy(pWidth, p, sizeof(int)); p += sizeof(int);
 	ACE_OS::memcpy(pHeight, p, sizeof(int)); p += sizeof(int);
 	ACE_OS::memcpy(pLength, p, sizeof(int)); p += sizeof(int);
+
+	return nTimeStampSize + sizeof(int) * 3;
 }
