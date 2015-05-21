@@ -49,9 +49,9 @@ int CRestoreTask::svc(void)
 
 int CRestoreTask::restore(const _u8* compress_buffer, const _u32 compress_buffer_len, const _u16 width, const _u16 height, const _u32 bpp)
 {
-	uLongf uDecompBufferLen = 0;
+	uLongf uDecompBufferLen = BUFFER_SIZE;
 	uncompress((Bytef*)m_pDecompBuffer, &uDecompBufferLen, (Bytef*)compress_buffer, compress_buffer_len);
-	//ACE_ASSERT(uDecompBufferLen > 0);
+	ACE_ASSERT(uDecompBufferLen > 0);
 
 	return 0;
 }
