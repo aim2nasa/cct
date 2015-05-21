@@ -9,6 +9,7 @@
 #include "ace/OS_NS_time.h"
 #include "ace/Date_Time.h"
 #include "ace/OS.h"
+#include "utility.h"
 
 #define SIZE_BUF (1024*4)
 #define REF_WIDTH 1440
@@ -18,18 +19,8 @@
 #define TIMESTAMP_SIZE 27
 #define HEADER_SIZE 39	//Timestamp(27)+width(4)+height(4)+length(4)
 
-typedef unsigned char   _u8;
-typedef unsigned short  _u16;
-typedef unsigned int    _u32;
-typedef signed char     _s8;
-typedef signed short    _s16;
-typedef signed int      _s32;
-
 static char* SERVER_HOST = "127.0.0.1";
 static u_short SERVER_PORT = 19001;
-
-int get_frame(_u8* p, _u32 fbiSize, ACE_SOCK_Stream& client_stream);
-void parseHeader(const _u8* pBuffer, ACE_TCHAR* pTimeStamp, int nTimeStampSize, int* pWidth, int* pHeight, int* Length);
 
 int main(int argc, char *argv[])
 {
@@ -74,32 +65,4 @@ int main(int argc, char *argv[])
 		ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) %p \n", "close"), -1);
 
 	return 0;
-}
-
-int get_frame(_u8* p, _u32 fbiSize, ACE_SOCK_Stream& client_stream)
-{
-	static const _u32 buff_size = 1 * 1024;
-	int fb_size = fbiSize;
-	int total_read = 0;
-	int read_size = buff_size;
-	int ret;
-	_u8 buff[buff_size];
-
-	while (0 < (ret = client_stream.recv_n(buff,read_size))) {
-		total_read += ret;
-		memcpy(p, buff, ret);
-		p += ret;
-		if (fb_size - total_read < buff_size) read_size = fb_size - total_read;
-	}
-	return total_read;
-}
-
-void parseHeader(const _u8* pBuffer, ACE_TCHAR* pTimeStamp,int nTimeStampSize, int* pWidth, int* pHeight,int* pLength)
-{
-	const _u8* p = pBuffer;
-
-	ACE_OS::memcpy(pTimeStamp, p, nTimeStampSize); p += nTimeStampSize;
-	ACE_OS::memcpy(pWidth, p, sizeof(int)); p += sizeof(int);
-	ACE_OS::memcpy(pHeight, p, sizeof(int)); p += sizeof(int);
-	ACE_OS::memcpy(pLength, p, sizeof(int)); p += sizeof(int);
 }
