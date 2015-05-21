@@ -15,7 +15,7 @@
 static char* SERVER_HOST = "127.0.0.1";
 static u_short SERVER_PORT = 19001;
 
-int main(int argc, char *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
 	const char *server_host = argc > 1 ? argv[1] : SERVER_HOST;
 	u_short server_port = argc > 2 ? ACE_OS::atoi(argv[2]) : SERVER_PORT;
