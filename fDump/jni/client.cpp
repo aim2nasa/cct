@@ -67,14 +67,6 @@ int main(int argc, char *argv[])
 		dt.update(ACE_OS::gettimeofday());
 		ACE_DEBUG((LM_DEBUG, "%s w(%d) h(%d) length(%d) %dms\n",timeStamp,nWidth,nHeight,nLength,tv.msec()));
 		//ACE_DEBUG((LM_DEBUG, "Rcv %d-%02d-%02d %02d:%02d:%02d.%06d\n", dt.year(),dt.month(), dt.day(), dt.hour(), dt.minute(), dt.second(), dt.microsec()));
-
-#ifdef _DELTA_T_DUMP
-		FILE* fDump = ACE_OS::fopen(ACE_TEXT("client_dt.txt"), ACE_TEXT("w+"));
-		ACE_TCHAR dtBuf[16];
-		ACE_OS::sprintf(dtBuf, ACE_TEXT(" %d"), tv.msec());
-		ACE_OS::fwrite(dtBuf, ACE_OS::strlen(dtBuf), 1, fDump);
-		ACE_OS::fclose(fDump);
-#endif
 	}
 	delete[] pRawBuffer;
 

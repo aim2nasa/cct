@@ -122,15 +122,6 @@ int CCapTask::svc(void)
 		}
 
 		tv = ACE_OS::gettimeofday() - tv;
-
-		#ifdef _DELTA_T_DUMP
-		FILE* fDump = ACE_OS::fopen(ACE_TEXT("dt.txt"), ACE_TEXT("w+"));
-		ACE_TCHAR dtBuf[16];
-		ACE_OS::sprintf(dtBuf,ACE_TEXT(" %d"),tv.msec());
-		ACE_OS::fwrite(dtBuf,ACE_OS::strlen(dtBuf), 1, fDump);
-		ACE_OS::fclose(fDump);
-		#endif
-
 		ACE_OS::sprintf(msg,ACE_TEXT(" %dms"),tv.msec());
 		str+=ACE_TEXT(msg);
 		ACE_DEBUG((LM_DEBUG,"%s\n",str.c_str()));
