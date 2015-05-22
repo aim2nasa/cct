@@ -15,6 +15,7 @@ public:
 	static void downsideUp(const _u8* in_buffer, _u8* out_buffer, const _u16 width, const _u16 height, const _u32 bpp);
 	static int write_bmp(ACE_TCHAR* pFileName, _u8* buffer, const _u16 width, const _u16 height, const _u32 bpp);
 
+	bool	m_bWriteBmp;
 protected:
 	_u8*	m_pDecompBuffer;
 	_u8*	m_pInvertBuffer;
