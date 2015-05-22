@@ -54,7 +54,7 @@ int CRestoreTask::restore(ACE_TCHAR* pDvTime, ACE_TCHAR* pPcTime, const _u8* com
 	uncompress((Bytef*)m_pDecompBuffer, &uDecompBufferLen, (Bytef*)compress_buffer, compress_buffer_len);
 	ACE_ASSERT(uDecompBufferLen > 0);
 
-	invert_data(m_pDecompBuffer,m_pInvertBuffer, width, height, bpp);
+	downsideUp(m_pDecompBuffer, m_pInvertBuffer, width, height, bpp);
 
 	ACE_TCHAR fileName[512];
 	ACE_OS::sprintf(fileName, "C%s_R%s_whls(%d_%d_%d_%d).bmp", pDvTime, pPcTime, width, height, compress_buffer_len);
@@ -64,7 +64,7 @@ int CRestoreTask::restore(ACE_TCHAR* pDvTime, ACE_TCHAR* pPcTime, const _u8* com
 	return 0;
 }
 
-void CRestoreTask::invert_data(const _u8* in_buffer, _u8* out_buffer, const _u16 width, const _u16 height, const _u32 bpp)
+void CRestoreTask::downsideUp(const _u8* in_buffer, _u8* out_buffer, const _u16 width, const _u16 height, const _u32 bpp)
 {
 	_u16 i = 0, j = height;
 	_u32 pixel_per_bytes = bpp / 8;
