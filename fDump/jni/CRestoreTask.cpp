@@ -75,6 +75,7 @@ void CRestoreTask::downsideUp(const _u8* in_buffer, _u8* out_buffer, const _u16 
 
 int CRestoreTask::write_bmp(ACE_TCHAR* pFileName, _u8* buffer, const _u16 width, const _u16 height, const _u32 bpp)
 {
+#ifdef _WIN32
 	FILE *f = ACE_OS::fopen(pFileName, ACE_TEXT("wb"));
 	ACE_ASSERT(f!=NULL);
 
@@ -116,5 +117,6 @@ int CRestoreTask::write_bmp(ACE_TCHAR* pFileName, _u8* buffer, const _u16 width,
 		nWrite = ACE_OS::fwrite(buffer, bmi.biSizeImage, 1, f);
 	}
 	ACE_OS::fclose(f);
+#endif
 	return 0;
 }
