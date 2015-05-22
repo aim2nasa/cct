@@ -7,7 +7,7 @@
 #define BUFFER_SIZE	(16*1024*1024)	//16MB
 
 CRestoreTask::CRestoreTask()
-	:m_pDecompBuffer(NULL), m_pInvertBuffer(NULL)
+	:m_bWriteBmp(false), m_pDecompBuffer(NULL), m_pInvertBuffer(NULL)
 {
 	m_pDecompBuffer = new _u8[BUFFER_SIZE];
 	m_pInvertBuffer = new _u8[BUFFER_SIZE];
@@ -60,7 +60,7 @@ int CRestoreTask::restore(ACE_TCHAR* pDvTime, ACE_TCHAR* pPcTime, const _u8* com
 	ACE_OS::sprintf(fileName, "C%s_R%s_whls(%d_%d_%d_%d).bmp", pDvTime, pPcTime, width, height, compress_buffer_len);
 	ACE::strrepl(fileName, ':', '_');
 
-	write_bmp(fileName, m_pInvertBuffer, width, height, bpp);
+	if (m_bWriteBmp) write_bmp(fileName, m_pInvertBuffer, width, height, bpp);
 	return 0;
 }
 

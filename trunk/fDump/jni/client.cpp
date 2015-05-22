@@ -12,7 +12,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
 	const char *server_host = argc > 1 ? argv[1] : SERVER_HOST;
 	u_short server_port = argc > 2 ? ACE_OS::atoi(argv[2]) : SERVER_PORT;
-	ACE_DEBUG((LM_INFO, "(%P|%t) server info(addr:%s,port:%d)\n", server_host, server_port));
+
+	CRestoreTask rt;
+	if(argc>3) rt.m_bWriteBmp = (ACE_OS::atoi(argv[3]) == 0) ? false : true;
+
+	ACE_DEBUG((LM_INFO, "(%P|%t) server info(addr:%s,port:%d) writeBmp(%s)\n",
+		server_host, server_port, rt.m_bWriteBmp?"true":"false"));
 
 	ACE_SOCK_Stream client_stream;
 	ACE_INET_Addr remote_addr(server_port, server_host);
@@ -24,7 +29,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 	else
 		ACE_DEBUG((LM_DEBUG, "(%P|%t) connected to %s \n", remote_addr.get_host_name()));
 
-	CRestoreTask rt;
 	ACE_Message_Queue<ACE_MT_SYNCH>* m_pQ = rt.msg_queue();
 	rt.activate();
 
